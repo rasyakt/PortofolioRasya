@@ -1,0 +1,77 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    String   // "enterprise" | "mobile" | "ai" | "systems" | "fullstack"
+  description String
+  longDesc    String?
+  problem     String?
+  solution    String?
+  architecture String?
+  impact      String?
+  techStack   String   // JSON array stored as string
+  liveUrl     String?
+  githubUrl   String?
+  coverImage  String?
+  hkiNumber   String?  // Kemenkumham registration number
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Certification {
+  id          String   @id @default(cuid())
+  title       String
+  issuer      String
+  issueDate   String
+  credentialUrl String?
+  badgeImage  String?
+  type        String   @default("cert") // "cert" | "hki" | "award"
+  regNumber   String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProfileConfig {
+  id              String   @id @default(cuid())
+  name            String   @default("Rasya Syahreza Maulana Zen")
+  headline        String   @default("Fullstack Mobile & Web Developer | AI Engineer | CTO at BotHax")
+  bio             String
+  location        String   @default("Ciamis, West Java, Indonesia")
+  email           String   @default("rasyasyahrezamaulanazen@gmail.com")
+  phone           String   @default("+62 838 4055 9238")
+  github          String   @default("https://github.com/rasyakt")
+  linkedin        String   @default("https://linkedin.com/in/rasya-syahreza")
+  portfolioUrl    String   @default("https://gasela.my.id")
+  cvUrl           String?
+  isAvailable     Boolean  @default(true)
+  availabilityText String  @default("Open for Industrial Internship / Full-time roles")
+  updatedAt       DateTime @updatedAt
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // bcrypt hashed
+  createdAt DateTime @default(now())
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  createdAt DateTime @default(now())
+}

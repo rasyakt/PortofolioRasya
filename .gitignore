@@ -1,0 +1,85 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js & Build Outputs
+.next/
+out/
+build/
+dist/
+.vercel
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# AI Assistant & Tool Configuration (e.g. Next.js auto-generated agent files)
+AGENTS.md
+agents.md
+CLAUDE.md
+claude.md
+.agents/
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.gemini/
+
+# Databases & SQLite
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+dev.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# Environment Variables
+.env
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Logs & Debugging
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Temporary & Cache Files
+*.tmp
+*.temp
+.cache/
+.turbo/
+
+# Root PDF Documents (App CV is located in portfolio/public/cv.pdf)
+/*.pdf
