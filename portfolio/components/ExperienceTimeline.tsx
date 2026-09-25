@@ -2,86 +2,67 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Briefcase, GraduationCap, Trophy, Code2, ArrowRight } from "lucide-react";
+import { Briefcase, GraduationCap, Trophy, Code2 } from "lucide-react";
 
 const TIMELINE = [
   {
     year: "2023 – Present",
-    role: "Chief Technology Officer (CTO)",
+    role: "Chief Technology Officer",
     company: "BotHax",
-    type: "work",
-    color: "var(--accent)",
-    icon: <Briefcase size={16} />,
+    icon: <Briefcase size={14} />,
     points: [
-      "Defined and owned full technical architecture across all BotHax products",
-      "Lua scripting for automation, packet handling, and event hooking systems",
-      "Hardware & network administration — ensuring 99.9% uptime",
-      "Led system maintenance, security hardening, and performance optimization",
+      "Own full technical architecture across all BotHax products",
+      "Automation scripting, hardware & network administration",
+      "System maintenance, security hardening, performance optimization",
     ],
   },
   {
     year: "2026",
-    role: "LKS West Java Delegate",
-    company: "Dinas Pendidikan & Olahraga Jawa Barat",
-    type: "award",
-    color: "#a78bfa",
-    icon: <Trophy size={16} />,
+    role: "LKS West Java Delegate — Web Technologies",
+    company: "Dinas Pendidikan Jawa Barat",
+    icon: <Trophy size={14} />,
     points: [
-      "Selected as West Java Province delegate for Web Technologies competition",
-      "Competed at the Provincial (Tingkat Provinsi) level representing SMK Negeri 1 Ciamis",
-      "One of the most prestigious vocational skill competitions in Indonesia",
+      "Provincial-level vocational skill competition",
+      "Representing SMK Negeri 1 Ciamis",
     ],
   },
   {
     year: "2026",
     role: "3× Kemenkumham IP Copyright Holder",
     company: "DJKI Kemenkumham RI",
-    type: "award",
-    color: "#fbbf24",
-    icon: <Trophy size={16} />,
+    icon: <Trophy size={14} />,
     points: [
-      "ARTIKA-POS — Reg. No. 001416260 (Retail POS Ecosystem)",
-      "ETAMU-KCD — Reg. No. 001449497 (Face Recognition Guestbook)",
-      "Calakan — Reg. No. 001448869 (Ramadan Activity Tracker)",
+      "ARTIKA-POS — Reg. No. 001416260",
+      "ETAMU-KCD — Reg. No. 001449497",
+      "Calakan — Reg. No. 001448869",
     ],
   },
   {
     year: "2025 – 2026",
     role: "School Software Showcase Lead",
     company: "SMK Negeri 1 Ciamis",
-    type: "work",
-    color: "#38bdf8",
-    icon: <Code2 size={16} />,
+    icon: <Code2 size={14} />,
     points: [
-      "Led development of 5+ internal systems used by the school daily",
-      "MAS-PKL, a-Sign, Calakan, ETAMU-KCD — all in active production use",
-      "Mentored fellow students in web development and system architecture",
+      "5+ internal systems in daily production use",
+      "Mentored peers in web development and system design",
     ],
   },
   {
     year: "2025",
     role: "AI Top Graduate",
-    company: "IBM SkillsBuild × Hacktiv8 Indonesia",
-    type: "cert",
-    color: "#a78bfa",
-    icon: <Trophy size={16} />,
+    company: "IBM SkillsBuild × Hacktiv8",
+    icon: <Trophy size={14} />,
     points: [
-      "Completed end-to-end Agentic AI workflow training",
-      "LLM orchestration, RAG pipelines, MLOps, IBM Bob",
-      "Recognized as top graduate in cohort",
+      "Agentic AI workflows, LLM orchestration, RAG, MLOps",
     ],
   },
   {
     year: "2024 – 2027",
-    role: "Student — Software & Game Development",
+    role: "Software & Game Development Student",
     company: "SMK Negeri 1 Ciamis (PPLG / RPL)",
-    type: "edu",
-    color: "var(--text-muted)",
-    icon: <GraduationCap size={16} />,
+    icon: <GraduationCap size={14} />,
     points: [
-      "Rekayasa Perangkat Lunak (RPL) / Pengembangan Perangkat Lunak dan Gim (PPLG)",
-      "Building real systems for real institutions since Year 1",
-      "Maintaining 12+ production projects alongside studies",
+      "Building production systems alongside studies",
     ],
   },
 ];
@@ -91,78 +72,61 @@ export default function ExperienceTimeline() {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section id="experience" ref={ref} className="py-20 max-w-6xl mx-auto px-6 scroll-mt-20">
+    <section id="experience" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5 }}
-        className="mb-12"
+        transition={{ duration: 0.4 }}
+        className="mb-10"
       >
         <p className="section-label mb-2">Journey</p>
-        <h2 className="text-3xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
-          Experience & Leadership
-        </h2>
-        <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-          From student to CTO — engineering at every step
-        </p>
+        <h2 className="section-title">Experience</h2>
+        <p className="section-desc">From student to CTO.</p>
       </motion.div>
 
       <div className="relative">
         {/* Vertical line */}
         <div
-          className="absolute left-6 top-0 bottom-0 w-px"
-          style={{ background: "linear-gradient(to bottom, var(--accent), transparent)" }}
+          className="absolute left-[15px] top-1 bottom-1 w-px"
+          style={{ background: "var(--border)" }}
         />
 
-        <div className="space-y-8 pl-16">
+        <div className="space-y-3">
           {TIMELINE.map((item, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, x: -16 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="relative"
+              initial={{ opacity: 0, y: 12 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.35, delay: i * 0.06 }}
+              className="relative pl-12"
             >
               {/* Dot */}
               <div
-                className="absolute -left-12 w-8 h-8 rounded-full flex items-center justify-center"
+                className="absolute left-0 top-5 w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
-                  background: `${item.color}18`,
-                  border: `1.5px solid ${item.color}50`,
-                  color: item.color,
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--border-strong)",
+                  color: "var(--text-secondary)",
                 }}
               >
                 {item.icon}
               </div>
 
               {/* Card */}
-              <div
-                className="glass glass-hover p-5 rounded-xl"
-                style={{ borderColor: `${item.color}20` }}
-              >
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-xs font-mono mb-1" style={{ color: item.color }}>
-                      {item.year}
-                    </p>
-                    <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                      {item.role}
-                    </h3>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {item.company}
-                    </p>
-                  </div>
-                </div>
-                <ul className="space-y-1.5">
+              <div className="card card-hover p-5">
+                <p className="text-[11px] font-mono mb-1" style={{ color: "var(--text-muted)" }}>
+                  {item.year}
+                </p>
+                <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                  {item.role}
+                </h3>
+                <p className="text-xs mt-0.5 mb-3" style={{ color: "var(--text-muted)" }}>
+                  {item.company}
+                </p>
+                <ul className="space-y-1">
                   {item.points.map((pt, j) => (
-                    <li key={j} className="flex items-start gap-2">
-                      <ArrowRight
-                        size={12}
-                        style={{ color: item.color, flexShrink: 0, marginTop: 3 }}
-                      />
-                      <span className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                        {pt}
-                      </span>
+                    <li key={j} className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                      {pt}
                     </li>
                   ))}
                 </ul>

@@ -113,6 +113,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
         ),
         liveUrl: data.liveUrl || undefined,
         githubUrl: data.githubUrl || undefined,
+        coverImage: data.coverImage || undefined,
         hkiNumber: data.hkiNumber || undefined,
       } as Parameters<typeof createProject>[0];
 
@@ -327,6 +328,14 @@ export default function ProjectForm({ project }: { project?: Project }) {
           value={data.hkiNumber ?? ""}
           onChange={(val) => set("hkiNumber", val)}
           placeholder="001416260"
+        />
+
+        {/* Cover */}
+        <FormField
+          label="Cover Image URL (kosongkan = pola otomatis)"
+          value={data.coverImage ?? ""}
+          onChange={(val) => set("coverImage", val)}
+          placeholder="https://... atau /covers/nama.png (taruh file di public/covers/)"
         />
       </div>
     </form>

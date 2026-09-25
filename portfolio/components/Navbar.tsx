@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal, Menu, X, Search, Lock } from "lucide-react";
+import { Menu, X, Search } from "lucide-react";
 import { useCommandPalette } from "./CommandPaletteProvider";
+import ThemeToggle from "./ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Projects", href: "#projects" },
-  { label: "Certifications", href: "#certifications" },
   { label: "Experience", href: "#experience" },
+  { label: "Certifications", href: "#certifications" },
+  { label: "Contact", href: "#contact" },
 ];
 
 export default function Navbar() {
@@ -17,48 +19,37 @@ export default function Navbar() {
   const { open } = useCommandPalette();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler);
+    const handler = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
   const scrollTo = (href: string) => {
     setMobileOpen(false);
-    const el = document.querySelector(href);
-    el?.scrollIntoView({ behavior: "smooth" });
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="fixed top-0 left-0 right-0 z-50 transition-colors duration-200"
       style={{
-        background: scrolled ? "rgba(9,9,11,0.88)" : "rgba(9,9,11,0.5)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        borderBottom: scrolled ? "1px solid rgba(63,63,70,0.5)" : "1px solid rgba(63,63,70,0.2)",
+        background: scrolled ? "color-mix(in srgb, var(--bg-base) 85%, transparent)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
       }}
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a
-          href="#hero"
-          className="flex items-center gap-2.5 group"
-          onClick={(e) => { e.preventDefault(); scrollTo("#hero"); }}
+        <button
+          onClick={() => scrollTo("#hero")}
+          className="text-sm font-semibold tracking-tight t-primary cursor-pointer bg-transparent border-none"
         >
-          <div
-            className="p-1.5 rounded-lg transition-all group-hover:scale-105"
-            style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-border)" }}
-          >
-            <Terminal size={14} style={{ color: "var(--accent)" }} />
-          </div>
-          <span className="font-bold text-sm tracking-tight" style={{ color: "var(--text-primary)" }}>
-            rasyakt
-            <span style={{ color: "var(--accent)" }}>.dev</span>
-          </span>
-        </a>
+          rasya<span style={{ color: "var(--accent)" }}>.</span>dev
+        </button>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
@@ -66,7 +57,7 @@ export default function Navbar() {
             <button
               key={link.label}
               onClick={() => scrollTo(link.href)}
-              className="btn btn-ghost px-3.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors"
+              className="px-3 py-1.5 text-[13px] t-secondary transition-colors cursor-pointer bg-transparent border-none"
             >
               {link.label}
             </button>
@@ -74,43 +65,24 @@ export default function Navbar() {
         </nav>
 
         {/* Right actions */}
-        <div className="flex items-center gap-2.5">
-          {/* Search button */}
+        <div className="flex items-center gap-2">
           <button
             onClick={open}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
-            style={{
-              background: "rgba(24,24,27,0.8)",
-              border: "1px solid rgba(63,63,70,0.5)",
-              color: "var(--text-muted)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-highlight)";
-              e.currentTarget.style.color = "var(--text-secondary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(63,63,70,0.5)";
-              e.currentTarget.style.color = "var(--text-muted)";
-            }}
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs t-muted transition-colors cursor-pointer"
+            style={{ border: "1px solid var(--border)", background: "transparent" }}
           >
-            <Search size={12} className="text-emerald-400" />
-            <span className="font-mono text-[11px] text-zinc-400">Ctrl+K</span>
+            <Search size={13} />
+            <span className="font-mono text-[11px]">Ctrl K</span>
           </button>
 
-          <a
-            href="/admin"
-            className="btn btn-secondary hidden sm:flex items-center gap-1.5"
-            style={{ padding: "6px 12px", fontSize: "12px" }}
-          >
-            <Lock size={11} className="text-emerald-400" />
-            <span className="font-mono">CMS</span>
-          </a>
+          <ThemeToggle className="hidden sm:block" />
 
-          {/* Mobile menu toggle */}
+          {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 rounded-lg"
-            style={{ color: "var(--text-muted)", background: "var(--bg-elevated)", border: "1px solid var(--border)" }}
+            className="md:hidden p-2 rounded-lg t-muted cursor-pointer"
+            style={{ border: "1px solid var(--border)", background: "transparent" }}
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
@@ -121,39 +93,26 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t overflow-hidden"
-            style={{ borderColor: "var(--border)", background: "rgba(9,9,11,0.95)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="md:hidden border-t"
+            style={{ borderColor: "var(--border)", background: "var(--bg-base)" }}
           >
-            <div className="px-6 py-4 space-y-1">
-              {NAV_LINKS.map((link) => (
-                <button
-                  key={link.label}
-                  onClick={() => scrollTo(link.href)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm transition-all"
-                  style={{ color: "var(--text-secondary)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-                >
-                  {link.label}
-                </button>
-              ))}
-              <button
-                onClick={open}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-2"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <Search size={13} /> Search (Ctrl+K)
-              </button>
-              <a
-                href="/admin"
-                className="block px-3 py-2 rounded-lg text-sm"
-                style={{ color: "var(--accent)" }}
-              >
-                Admin CMS →
-              </a>
+            <div className="px-6 py-3 flex items-center justify-between">
+              <div>
+                {NAV_LINKS.map((link) => (
+                  <button
+                    key={link.label}
+                    onClick={() => scrollTo(link.href)}
+                    className="block w-full text-left px-2 py-2.5 text-sm t-secondary cursor-pointer bg-transparent border-none"
+                  >
+                    {link.label}
+                  </button>
+                ))}
+              </div>
+              <ThemeToggle />
             </div>
           </motion.div>
         )}

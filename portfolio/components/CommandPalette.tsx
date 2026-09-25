@@ -243,8 +243,8 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search input */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800">
-              <Search size={16} className="text-zinc-500 shrink-0" />
+            <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
+              <Search size={16} className="t-muted shrink-0" />
               <input
                 autoFocus
                 className="cmd-input px-0 py-0 text-sm"
@@ -264,7 +264,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             <div className="cmd-results">
               {Object.entries(grouped).map(([category, items]) => (
                 <div key={category} className="mb-3">
-                  <p className="px-3 py-1 text-xs font-semibold text-zinc-600 uppercase tracking-widest font-mono">
+                  <p className="px-3 py-1 text-xs font-semibold t-muted uppercase tracking-widest font-mono">
                     {category}
                   </p>
                   {items.map((item) => {
@@ -279,9 +279,9 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
                         onMouseEnter={() => setActiveIndex(globalIdx)}
                       >
                         <span className="cmd-item-icon">{item.icon}</span>
-                        <span className="text-sm text-zinc-300 flex-1">{item.label}</span>
+                        <span className="text-sm t-secondary flex-1">{item.label}</span>
                         {globalIdx === activeIndex && (
-                          <kbd className="px-1.5 py-0.5 text-xs bg-zinc-800 text-zinc-500 rounded font-mono border border-zinc-700">
+                          <kbd className="kbd">
                             ↵
                           </kbd>
                         )}
@@ -291,20 +291,20 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 </div>
               ))}
               {results.length === 0 && (
-                <p className="text-center text-zinc-500 text-sm py-8">
+                <p className="text-center t-muted text-sm py-8">
                   No results for &quot;{query}&quot;
                 </p>
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-zinc-800 bg-zinc-900/50">
-              <div className="flex items-center gap-3 text-xs text-zinc-600 font-mono">
+            <div className="flex items-center justify-between px-4 py-2.5 border-t" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
+              <div className="flex items-center gap-3 text-xs t-muted font-mono">
                 <span>↑↓ navigate</span>
                 <span>↵ select</span>
                 <span>esc close</span>
               </div>
-              <span className="text-xs text-zinc-600 font-mono">⌘K</span>
+              <span className="text-xs t-muted font-mono">⌘K</span>
             </div>
           </motion.div>
         </motion.div>
