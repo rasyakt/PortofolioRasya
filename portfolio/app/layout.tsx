@@ -32,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const profile = await getProfile().catch(() => null);
   const name = profile?.name || FALLBACK_NAME;
   return {
+    metadataBase: new URL("https://rasyasmz.my.id"),
     title: `${name} — Fullstack Developer & AI Engineer`,
     description:
       `Portfolio of ${name} — ${profile?.headline || "Fullstack Mobile & Web Developer, AI Engineer, and CTO at BotHax"}.`,
@@ -52,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: "website",
       locale: "en_US",
-      url: "https://rasyakt.dev",
+      url: "https://rasyasmz.my.id",
       title: `${name} — Fullstack Developer & AI Engineer`,
       description: profile?.bio || "Building enterprise systems, AI agents, and mobile apps.",
       siteName: `${name} Portfolio`,
@@ -65,6 +66,9 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: {
       index: true,
       follow: true,
+    },
+    alternates: {
+      canonical: "/",
     },
   };
 }
@@ -86,7 +90,7 @@ export default async function RootLayout({
     "@context": "https://schema.org",
     "@type": "Person",
     name,
-    url: "https://rasyakt.dev",
+    url: "https://rasyasmz.my.id",
     jobTitle: profile?.headline || FALLBACK_HEADLINE,
     address: {
       "@type": "PostalAddress",

@@ -1,0 +1,71 @@
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-portofoliorasya}
+      MYSQL_USER: ${MYSQL_USER:?set in .env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set in .env}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:?set in .env}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Inside compose the database host is the `db` service (overrides .env host)
+      DATABASE_URL: mysql://${MYSQL_USER:?set in .env}:${MYSQL_PASSWORD:?set in .env}@db:3306/${MYSQL_DATABASE:-portofoliorasya}
+      NEXTAUTH_URL: https://rasyasmz.my.id
+    volumes:
+      # Persist user uploads across rebuilds
+      - uploads-covers:/app/public/covers
+      - uploads-badges:/app/public/badges
+      - uploads-docs:/app/public/docs
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+  # Optional: run your Cloudflare Tunnel from compose.
+  # 1. Create a tunnel in Zero Trust dashboard, get the token.
+  # 2. Set CLOUDFLARE_TUNNEL_TOKEN in .env, uncomment below.
+  # 3. Point tunnel hostname rasyasmz.my.id -> http://nginx:80
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - nginx
+  #   command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   environment:
+  #     - TUNNEL_TRANSPORT_PROTOCOL=quic
+
+volumes:
+  db-data:
+  uploads-covers:
+  uploads-badges:
+  uploads-docs:

@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
+  output: "standalone",
   async headers() {
     const security = [
       { key: "X-Frame-Options", value: "DENY" },

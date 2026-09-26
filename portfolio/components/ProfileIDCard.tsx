@@ -132,6 +132,7 @@ export default function ProfileIDCard({ name, headline, location, email, photoUr
                     fill
                     sizes="280px"
                     style={{ objectFit: "cover" }}
+                    unoptimized
                     onError={() => setSrcIndex((i) => i + 1)}
                   />
                 ) : (
