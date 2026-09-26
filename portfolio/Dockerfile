@@ -2,7 +2,9 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+# --ignore-scripts: postinstall (prisma generate) needs prisma/schema.prisma,
+# which is only copied in the builder stage below.
+RUN npm ci --ignore-scripts
 
 # ---------- builder ----------
 FROM node:22-alpine AS builder
@@ -11,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 # prisma-client-js output path + PDF worker are refreshed here as well
-RUN npx prisma generate && npm run build
+RUN npx prisma generate && node scripts/copy-pdf-worker.mjs && npm run build
 
 # ---------- runner ----------
 FROM node:22-alpine AS runner
