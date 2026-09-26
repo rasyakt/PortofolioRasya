@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Download, ArrowRight, Copy, Check, Eye } from "lucide-react";
 import type { ProfileConfig, Certification } from "@prisma/client";
 import RecruiterModal from "./RecruiterModal";
 import CVPreviewModal from "./CVPreviewModal";
 import ProfileIDCard from "./ProfileIDCard";
+import DecodeText from "./DecodeText";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./ui/Toaster";
@@ -78,6 +79,15 @@ export default function Hero({
   const primaryBtnRef = useMagnetic<HTMLAnchorElement>(12);
   const secondaryBtnRef = useMagnetic<HTMLAnchorElement>(10);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const auroraY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+  const portraitY = useTransform(scrollYProgress, [0, 1], [0, 70]);
+
   const name = profile?.name || FALLBACK.name;
   const words = name.split(" ").filter(Boolean);
   const mid = Math.max(1, Math.ceil(words.length / 2));
@@ -120,11 +130,16 @@ export default function Hero({
     <>
       <section
         id="hero"
+        ref={sectionRef}
         className="relative flex flex-col justify-center hero-wash overflow-hidden"
         style={{ minHeight: "88vh", paddingTop: "64px" }}
       >
         {/* Aurora blobs */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        <motion.div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={reduceMotion ? undefined : { y: auroraY }}
+        >
           <div
             className="absolute -top-24 -left-24 w-[480px] h-[480px] rounded-full animate-drift"
             style={{ background: "radial-gradient(circle, var(--accent-soft) 0%, transparent 65%)", filter: "blur(50px)" }}
@@ -133,7 +148,7 @@ export default function Hero({
             className="absolute top-1/3 -right-32 w-[520px] h-[520px] rounded-full animate-drift-alt"
             style={{ background: "radial-gradient(circle, var(--accent-soft) 0%, transparent 65%)", filter: "blur(60px)" }}
           />
-        </div>
+        </motion.div>
 
         <div className="relative max-w-5xl mx-auto px-6 w-full py-16 grid lg:grid-cols-[1fr_280px] gap-12 items-center">
           <motion.div
@@ -168,8 +183,8 @@ export default function Hero({
                 <span key={i}>
                   {i > 0 && " · "}
                   {i === roles.length - 1
-                    ? <span style={{ color: "var(--accent)" }}>{r}</span>
-                    : r}
+                    ? <span style={{ color: "var(--accent)" }}><DecodeText text={r} delay={500 + i * 160} /></span>
+                    : <DecodeText text={r} delay={500 + i * 160} />}
                 </span>
               ))}
             </p>
@@ -255,10 +270,14 @@ export default function Hero({
 
           {/* Portrait */}
           <motion.div
+            className="max-w-[280px] w-full mx-auto lg:mx-0"
+            style={reduceMotion ? undefined : { y: portraitY }}
+          >
+          <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.15 }}
-            className="relative max-w-[280px] w-full mx-auto lg:mx-0"
+            className="relative w-full"
           >
             <div aria-hidden="true" className="absolute -inset-3 rounded-[28px] portrait-halo animate-spin-slow" />
             <div className="relative">
@@ -270,6 +289,7 @@ export default function Hero({
                 photoUrl={profile?.photoUrl}
               />
             </div>
+          </motion.div>
           </motion.div>
         </div>
 

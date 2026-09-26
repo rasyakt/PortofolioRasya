@@ -451,3 +451,21 @@ textarea.input-base { resize: vertical; min-height: 80px; }
   transform: translateX(130%);
   transition: transform 0.7s ease;
 }
+
+/* Cursor spotlight for cards (position fed by a delegated pointer tracker) */
+.spotlight { position: relative; }
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(16, 185, 129, 0.1),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.spotlight:hover::after { opacity: 1; }

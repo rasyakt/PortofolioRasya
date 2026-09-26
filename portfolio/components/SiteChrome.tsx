@@ -79,8 +79,22 @@ export function BackToTop() {
   );
 }
 
-/** Public-site chrome: progress bar + back-to-top. Mount once per page. */
+/** Public-site chrome: progress bar + back-to-top + card spotlight. */
 export default function SiteChrome() {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    const move = (e: PointerEvent) => {
+      const t = (e.target as HTMLElement | null)?.closest?.(".spotlight") as HTMLElement | null;
+      if (!t) return;
+      const r = t.getBoundingClientRect();
+      t.style.setProperty("--mx", `${Math.round(e.clientX - r.left)}px`);
+      t.style.setProperty("--my", `${Math.round(e.clientY - r.top)}px`);
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    return () => window.removeEventListener("pointermove", move);
+  }, []);
+
   return (
     <>
       <ScrollProgress />

@@ -12,6 +12,7 @@ import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./ui/Toaster";
 import { useFocusTrap } from "@/lib/focus-trap";
+import { useTilt } from "@/lib/interactions";
 
 export interface Project {
   id: string;
@@ -261,6 +262,7 @@ function CaseStudyModal({
 function ProjectCard({ project, onClick }: { project: Project; onClick: () => void }) {
   const allTech = safeParseJsonArray(project.techStack);
   const tech: string[] = allTech.slice(0, 4);
+  const tiltRef = useTilt<HTMLDivElement>(5);
 
   return (
     <motion.div
@@ -269,9 +271,10 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.3 }}
-      className="group card card-hover overflow-hidden flex flex-col cursor-pointer"
+      className="group card card-hover spotlight overflow-hidden flex flex-col cursor-pointer"
       onClick={onClick}
     >
+      <div ref={tiltRef} className="flex flex-col flex-1 min-h-0">
       {/* Cover */}
       <div style={{ borderBottom: "1px solid var(--border)" }}>
         <ProjectCover
@@ -354,6 +357,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
           )}
         </div>
       </div>
+      </div>
     </motion.div>
   );
 }
@@ -392,13 +396,19 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
   return (
     <section id="projects" className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       {/* Header */}
-      <div className="mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.45 }}
+        className="mb-8"
+      >
         <p className="section-label mb-2">Projects</p>
         <h2 className="section-title">Selected work</h2>
         <p className="section-desc">
           {projects.length} production applications — select a card for the full case study.
         </p>
-      </div>
+      </motion.div>
 
       {/* Filter tabs + search */}
       <div className="flex flex-wrap items-center gap-3 mb-8">

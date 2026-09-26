@@ -28,9 +28,9 @@ export default function ExperienceTimeline({ items }: { items: TimelineItem[] })
   return (
     <section id="experience" ref={ref} className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
+        animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+        transition={{ duration: 0.45 }}
         className="mb-10"
       >
         <p className="section-label mb-2">Journey</p>
@@ -71,7 +71,7 @@ export default function ExperienceTimeline({ items }: { items: TimelineItem[] })
               </div>
 
               {/* Card */}
-              <div className="card card-hover p-5">
+              <div className="card card-hover spotlight p-5">
                 <p className="text-[11px] font-mono t-muted mb-1">
                   {item.year}
                 </p>

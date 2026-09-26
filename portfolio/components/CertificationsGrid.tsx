@@ -67,9 +67,9 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
     <section id="certifications" ref={ref} className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
+        animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+        transition={{ duration: 0.45 }}
         className="mb-10"
       >
         <p className="section-label mb-2">Recognition</p>
@@ -89,7 +89,7 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
               initial={{ opacity: 0, y: 14 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.35, delay: i * 0.08 }}
-              className="card card-hover p-5"
+              className="card card-hover spotlight p-5"
             >
               <div className="mb-4">
                 {renderMark(cert, <Shield size={16} style={{ color: "var(--amber)" }} />)}
@@ -132,7 +132,7 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
               initial={{ opacity: 0, y: 12 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.35, delay: 0.2 + i * 0.06 }}
-              className="card card-hover p-4"
+              className="card card-hover spotlight p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
                 {renderMark(cert, <span style={{ color: "var(--text-muted)" }}>{cfg.icon}</span>)}
