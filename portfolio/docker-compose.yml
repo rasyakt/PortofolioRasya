@@ -55,16 +55,17 @@ services:
 
   # Optional: run your Cloudflare Tunnel from compose.
   # 1. Create a tunnel in Zero Trust dashboard, get the token.
-  # 2. Set CLOUDFLARE_TUNNEL_TOKEN in .env, uncomment below.
+  # 2. Set CLOUDFLARE_TUNNEL_TOKEN in .env.
   # 3. Point tunnel hostname rasyasmz.my.id -> http://nginx:80
-  # cloudflared:
-  #   image: cloudflare/cloudflared:latest
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - nginx
-  #   command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-  #   environment:
-  #     - TUNNEL_TRANSPORT_PROTOCOL=quic
+  # To disable, comment out the whole cloudflared block below.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?set in .env}
+    environment:
+      - TUNNEL_TRANSPORT_PROTOCOL=quic
 
 volumes:
   db-data:
