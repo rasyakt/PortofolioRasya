@@ -409,6 +409,10 @@ textarea.input-base { resize: vertical; min-height: 80px; }
 @keyframes spin-slow {
   to { transform: rotate(360deg); }
 }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 @keyframes float-soft {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
@@ -417,6 +421,7 @@ textarea.input-base { resize: vertical; min-height: 80px; }
 .animate-drift { animation: drift 14s ease-in-out infinite; }
 .animate-drift-alt { animation: drift-alt 19s ease-in-out infinite; }
 .animate-spin-slow { animation: spin-slow 9s linear infinite; }
+.animate-blink { animation: blink 1.1s step-end infinite; }
 .animate-float-soft { animation: float-soft 5s ease-in-out infinite; }
 
 /* Rotating halo behind the portrait */

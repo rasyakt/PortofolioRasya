@@ -2,6 +2,7 @@
 
 import type { ProfileConfig } from "@prisma/client";
 import { track } from "@/lib/analytics";
+import Logo from "./Logo";
 
 function digitsOnly(phone: string) {
   return phone.replace(/\D/g, "");
@@ -35,9 +36,9 @@ export default function Footer({ profile }: { profile: ProfileConfig | null }) {
         <div className="grid sm:grid-cols-3 gap-10 mb-12">
           {/* Brand */}
           <div>
-            <p className="text-sm font-semibold t-primary mb-3">
-              rasya<span style={{ color: "var(--accent)" }}>.</span>dev
-            </p>
+            <div className="mb-3">
+              <Logo onClick={() => scrollTo("#hero")} />
+            </div>
             <p className="text-[13px] leading-relaxed t-muted">
               {profile?.headline || "Fullstack developer & AI engineer."}
             </p>

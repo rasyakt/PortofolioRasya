@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Search } from "lucide-react";
 import { useCommandPalette } from "./CommandPaletteProvider";
 import ThemeToggle from "./ThemeToggle";
+import Logo from "./Logo";
 
 const NAV_LINKS = [
   { label: "Projects", href: "#projects" },
@@ -69,12 +70,7 @@ export default function Navbar() {
     >
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <button
-          onClick={() => scrollTo("#hero")}
-          className="text-sm font-semibold tracking-tight t-primary cursor-pointer bg-transparent border-none"
-        >
-          rasya<span style={{ color: "var(--accent)" }}>.</span>dev
-        </button>
+        <Logo onClick={() => scrollTo("#hero")} />
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
@@ -101,7 +97,7 @@ export default function Navbar() {
             <span className="font-mono text-[11px]">Ctrl K</span>
           </button>
 
-          <ThemeToggle className="hidden sm:block" />
+          <ThemeToggle />
 
           {/* Mobile toggle */}
           <button
@@ -126,20 +122,17 @@ export default function Navbar() {
             className="md:hidden border-t"
             style={{ borderColor: "var(--border)", background: "var(--bg-base)" }}
           >
-            <div className="px-6 py-3 flex items-center justify-between">
-              <div>
-                {NAV_LINKS.map((link) => (
-                  <button
-                    key={link.label}
-                    onClick={() => scrollTo(link.href)}
-                    className="block w-full text-left px-2 py-2.5 text-sm t-secondary cursor-pointer bg-transparent border-none"
-                    style={active === link.href ? { color: "var(--accent)" } : undefined}
-                  >
-                    {link.label}
-                  </button>
-                ))}
-              </div>
-              <ThemeToggle />
+            <div className="px-6 py-3">
+              {NAV_LINKS.map((link) => (
+                <button
+                  key={link.label}
+                  onClick={() => scrollTo(link.href)}
+                  className="block w-full text-left px-2 py-2.5 text-sm t-secondary cursor-pointer bg-transparent border-none"
+                  style={active === link.href ? { color: "var(--accent)" } : undefined}
+                >
+                  {link.label}
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
