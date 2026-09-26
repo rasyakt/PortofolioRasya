@@ -12,6 +12,11 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import SiteChrome from "@/components/SiteChrome";
 
+// Rendered on demand, not prerendered: the database only exists at
+// container runtime (migrations run on startup), so there is nothing
+// to bake in at build time — and content stays fresh without rebuilds.
+export const dynamic = "force-dynamic";
+
 function safeParseJsonArray(str?: string | null): string[] {
   if (!str) return [];
   try {
