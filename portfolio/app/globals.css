@@ -85,6 +85,19 @@ a.t-secondary:hover, button.t-secondary:hover { color: var(--text-primary); }
 }
 .icon-btn:hover { color: var(--accent); }
 
+/* Boxed contact icon */
+.contact-icon {
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  background: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.contact-icon:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  transform: translateY(-2px);
+}
+
 /* Subtle theme-aware hero wash */
 .hero-wash {
   background: radial-gradient(ellipse 60% 45% at 50% 0%, var(--hero-wash) 0%, transparent 70%);

@@ -1,8 +1,10 @@
 "use client";
 
 import type { ProfileConfig } from "@prisma/client";
+import { Mail } from "lucide-react";
 import { track } from "@/lib/analytics";
 import Logo from "./Logo";
+import { GithubIcon, LinkedinIcon, WhatsAppIcon } from "./icons/BrandIcons";
 
 function digitsOnly(phone: string) {
   return phone.replace(/\D/g, "");
@@ -20,10 +22,10 @@ export default function Footer({ profile }: { profile: ProfileConfig | null }) {
   const owner = profile?.name || "Rasya Syahreza Maulana Zen";
 
   const contacts = [
-    { label: "Email", href: `mailto:${email}` },
-    { label: "WhatsApp", href: `https://wa.me/${digitsOnly(phone)}` },
-    { label: "GitHub", href: github },
-    { label: "LinkedIn", href: linkedin },
+    { label: "Email", href: `mailto:${email}`, icon: <Mail size={16} /> },
+    { label: "WhatsApp", href: `https://wa.me/${digitsOnly(phone)}`, icon: <WhatsAppIcon size={16} /> },
+    { label: "GitHub", href: github, icon: <GithubIcon size={16} /> },
+    { label: "LinkedIn", href: linkedin, icon: <LinkedinIcon size={16} /> },
   ];
 
   return (
@@ -67,7 +69,7 @@ export default function Footer({ profile }: { profile: ProfileConfig | null }) {
           {/* Contact */}
           <div>
             <p className="section-label mb-4">Contact</p>
-            <div className="space-y-2.5 text-[13px]">
+            <div className="flex items-center gap-2.5">
               {contacts.map((c) => (
                 <a
                   key={c.label}
@@ -75,9 +77,11 @@ export default function Footer({ profile }: { profile: ProfileConfig | null }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => track("contact_click")}
-                  className="link-hover block"
+                  title={c.label}
+                  aria-label={c.label}
+                  className="contact-icon p-2.5 rounded-xl cursor-pointer"
                 >
-                  {c.label}
+                  {c.icon}
                 </a>
               ))}
             </div>
