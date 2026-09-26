@@ -178,11 +178,11 @@ export default function Hero({
             </p>
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 mb-6">
               <a
                 href="#projects"
                 ref={primaryBtnRef}
-                className="btn btn-primary"
+                className="btn btn-primary w-full sm:w-auto justify-center"
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
@@ -191,12 +191,12 @@ export default function Hero({
                 View Projects
                 <ArrowRight size={15} />
               </a>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex gap-2">
                 <a
                   ref={secondaryBtnRef}
                   href={cvUrl}
                   download="Rasya_Syahreza_CV.pdf"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary flex-1 sm:flex-none justify-center"
                   onClick={() => track("cv_download")}
                 >
                   <Download size={15} />
@@ -204,7 +204,7 @@ export default function Hero({
                 </a>
                 <button
                   onClick={() => setCvPreviewOpen(true)}
-                  className="btn btn-secondary"
+                  className="btn btn-secondary shrink-0"
                   style={{ padding: "10px 14px" }}
                   title="Preview CV"
                   aria-label="Preview CV"
@@ -214,7 +214,7 @@ export default function Hero({
               </div>
               <button
                 onClick={() => { track("recruiter_open"); setRecruiterOpen(true); }}
-                className="text-[13px] link-hover cursor-pointer bg-transparent border-none px-1"
+                className="text-[13px] link-hover cursor-pointer bg-transparent border-none p-0 text-left sm:px-1"
               >
                 For recruiters →
               </button>
@@ -279,8 +279,8 @@ export default function Hero({
           >
             {stats.map((s) => (
               <div key={s.label}>
-                <p className="text-xl font-semibold tracking-tight t-primary"><CountUp value={s.value} /></p>
-                <p className="text-xs t-muted mt-1">{s.label}</p>
+                <p className="text-lg sm:text-xl font-semibold tracking-tight t-primary"><CountUp value={s.value} /></p>
+                <p className="text-[11px] sm:text-xs t-muted mt-1 leading-snug">{s.label}</p>
               </div>
             ))}
           </div>

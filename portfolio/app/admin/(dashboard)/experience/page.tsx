@@ -7,7 +7,7 @@ export default async function AdminExperiencePage() {
   const items = await prisma.experience.findMany({ orderBy: { order: "asc" } });
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="section-label mb-1">CMS</p>

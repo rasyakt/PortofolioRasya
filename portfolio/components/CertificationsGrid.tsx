@@ -64,7 +64,7 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
   };
 
   return (
-    <section id="certifications" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
+    <section id="certifications" ref={ref} className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}

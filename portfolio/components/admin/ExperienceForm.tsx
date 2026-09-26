@@ -77,7 +77,7 @@ export default function ExperienceForm({ item }: { item?: Experience }) {
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="p-8 max-w-2xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="p-4 sm:p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="section-label mb-1">CMS</p>

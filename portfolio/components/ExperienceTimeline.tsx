@@ -26,7 +26,7 @@ export default function ExperienceTimeline({ items }: { items: TimelineItem[] })
   if (items.length === 0) return null;
 
   return (
-    <section id="experience" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
+    <section id="experience" ref={ref} className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}

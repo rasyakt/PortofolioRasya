@@ -390,7 +390,7 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
   };
 
   return (
-    <section id="projects" className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
+    <section id="projects" className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       {/* Header */}
       <div className="mb-8">
         <p className="section-label mb-2">Projects</p>

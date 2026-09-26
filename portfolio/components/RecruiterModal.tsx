@@ -144,7 +144,7 @@ export default function RecruiterModal({
               </div>
 
               {/* Contact row */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2">
                 {[
                   { icon: <Mail size={14} />, label: "Email", value: email, copyKey: "email" },
                   { icon: <Phone size={14} />, label: "WhatsApp", value: phone, copyKey: "phone" },
@@ -180,7 +180,7 @@ export default function RecruiterModal({
               </div>
 
               {/* Key metrics */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { value: `${projectCount}+`, label: "Projects" },
                   { value: `${hkiCerts.length}x`, label: "HKI Reg." },
@@ -227,7 +227,7 @@ export default function RecruiterModal({
               )}
 
               {/* Education & Experience */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-4 card">
                   <div className="flex items-center gap-2 mb-2">
                     <GraduationCap size={14} className="t-muted" />
@@ -249,7 +249,7 @@ export default function RecruiterModal({
               </div>
 
               {/* CTA */}
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <a
                   href={cvUrl}
                   download="Rasya_Syahreza_CV.pdf"

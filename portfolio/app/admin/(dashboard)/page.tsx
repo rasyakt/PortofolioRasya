@@ -33,7 +33,7 @@ export default async function AdminDashboard() {
   const eventCounts = Object.fromEntries(eventGroups.map((g) => [g.type, g._count.type]));
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-8">
         <p className="section-label mb-1">Admin CMS</p>
         <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>

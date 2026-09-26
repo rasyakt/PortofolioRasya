@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, ExternalLink, FileText } from "lucide-react";
 import { track } from "@/lib/analytics";
 import { useFocusTrap } from "@/lib/focus-trap";
+
+const CVPdfViewer = dynamic(() => import("./CVPdfViewer"), {
+  ssr: false,
+  loading: () => (
+    <p className="text-center text-sm t-muted py-16 animate-pulse">
+      Loading preview…
+    </p>
+  ),
+});
 
 interface CVPreviewModalProps {
   open: boolean;
@@ -104,24 +114,9 @@ export default function CVPreviewModal({ open, onClose, cvUrl }: CVPreviewModalP
               </div>
             </div>
 
-            {/* Viewer */}
-            <div className="flex-1 min-h-0" style={{ height: "70vh", background: "var(--bg-elevated)" }}>
-              <object
-                data={cvUrl}
-                type="application/pdf"
-                className="w-full h-full block"
-                aria-label="CV document"
-              >
-                <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
-                  <FileText size={32} className="t-muted" />
-                  <p className="text-sm t-secondary max-w-sm">
-                    Your browser can&apos;t preview PDFs inline. Download the file to view it.
-                  </p>
-                  <button onClick={download} className="btn btn-primary">
-                    <Download size={14} /> Download CV
-                  </button>
-                </div>
-              </object>
+            {/* Viewer — scrolls with the modal, all pages stacked */}
+            <div className="flex-1 min-h-0 overflow-y-auto" style={{ height: "70vh", background: "var(--bg-elevated)" }}>
+              <CVPdfViewer cvUrl={cvUrl} />
             </div>
           </motion.div>
         </motion.div>
