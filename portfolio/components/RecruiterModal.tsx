@@ -13,9 +13,11 @@ import {
   Copy,
   CheckCircle2,
   ExternalLink,
+  Eye,
 } from "lucide-react";
 import type { ProfileConfig, Certification } from "@prisma/client";
 import { GithubIcon } from "./icons/BrandIcons";
+import CVPreviewModal from "./CVPreviewModal";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./ui/Toaster";
@@ -39,17 +41,18 @@ export default function RecruiterModal({
   projectCount,
 }: RecruiterModalProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [cvPreviewOpen, setCvPreviewOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef, open);
+  useFocusTrap(dialogRef, open && !cvPreviewOpen);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || cvPreviewOpen) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [open, onClose]);
+  }, [open, onClose, cvPreviewOpen]);
 
   const name = profile?.name || "Rasya Syahreza Maulana Zen";
   const headline = profile?.headline || "Fullstack Developer · AI Engineer · CTO at BotHax";
@@ -256,6 +259,15 @@ export default function RecruiterModal({
                   <Download size={15} />
                   Download CV (PDF)
                 </a>
+                <button
+                  onClick={() => setCvPreviewOpen(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: "10px 14px" }}
+                  title="Preview CV"
+                  aria-label="Preview CV"
+                >
+                  <Eye size={15} />
+                </button>
                 <a
                   href={`https://wa.me/${waNumber}`}
                   target="_blank"
@@ -271,6 +283,11 @@ export default function RecruiterModal({
           </motion.div>
         </motion.div>
       )}
+      <CVPreviewModal
+        open={cvPreviewOpen}
+        onClose={() => setCvPreviewOpen(false)}
+        cvUrl={cvUrl}
+      />
     </AnimatePresence>
   );
 }

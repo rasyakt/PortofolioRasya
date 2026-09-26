@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Download, ArrowRight, Copy, Check } from "lucide-react";
+import { Download, ArrowRight, Copy, Check, Eye } from "lucide-react";
 import type { ProfileConfig, Certification } from "@prisma/client";
 import RecruiterModal from "./RecruiterModal";
+import CVPreviewModal from "./CVPreviewModal";
 import ProfileIDCard from "./ProfileIDCard";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
@@ -73,6 +74,7 @@ export default function Hero({
 }: HeroProps) {
   const [emailCopied, setEmailCopied] = useState(false);
   const [recruiterOpen, setRecruiterOpen] = useState(false);
+  const [cvPreviewOpen, setCvPreviewOpen] = useState(false);
   const primaryBtnRef = useMagnetic<HTMLAnchorElement>(12);
   const secondaryBtnRef = useMagnetic<HTMLAnchorElement>(10);
 
@@ -189,16 +191,27 @@ export default function Hero({
                 View Projects
                 <ArrowRight size={15} />
               </a>
-              <a
-                ref={secondaryBtnRef}
-                href={cvUrl}
-                download="Rasya_Syahreza_CV.pdf"
-                className="btn btn-secondary"
-                onClick={() => track("cv_download")}
-              >
-                <Download size={15} />
-                Download CV
-              </a>
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  ref={secondaryBtnRef}
+                  href={cvUrl}
+                  download="Rasya_Syahreza_CV.pdf"
+                  className="btn btn-secondary"
+                  onClick={() => track("cv_download")}
+                >
+                  <Download size={15} />
+                  Download CV
+                </a>
+                <button
+                  onClick={() => setCvPreviewOpen(true)}
+                  className="btn btn-secondary"
+                  style={{ padding: "10px 14px" }}
+                  title="Preview CV"
+                  aria-label="Preview CV"
+                >
+                  <Eye size={15} />
+                </button>
+              </div>
               <button
                 onClick={() => { track("recruiter_open"); setRecruiterOpen(true); }}
                 className="text-[13px] link-hover cursor-pointer bg-transparent border-none px-1"
@@ -255,9 +268,6 @@ export default function Hero({
                 photoUrl={profile?.photoUrl}
               />
             </div>
-            <p className="text-center text-xs font-mono t-muted mt-3">
-              rasya@workspace:~
-            </p>
           </motion.div>
         </div>
 
@@ -275,28 +285,6 @@ export default function Hero({
             ))}
           </div>
         </div>
-        {/* Tech marquee */}
-        {tech.length > 0 && (
-          <div
-            className="mt-2 border-y marquee-mask marquee-hover overflow-hidden"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div className="flex w-max animate-marquee">
-              {[0, 1].map((half) => (
-                <div key={half} className="flex shrink-0" aria-hidden={half === 1}>
-                  {tech.map((t) => (
-                    <span key={`${half}-${t}`} className="flex items-center whitespace-nowrap">
-                      <span className="px-6 py-3.5 text-xs font-mono t-muted uppercase tracking-widest">
-                        {t}
-                      </span>
-                      <span style={{ color: "var(--accent)", fontSize: "8px" }}>●</span>
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
       <RecruiterModal
@@ -306,6 +294,11 @@ export default function Hero({
         hkiCerts={hkiCerts}
         tech={tech}
         projectCount={projectCount}
+      />
+      <CVPreviewModal
+        open={cvPreviewOpen}
+        onClose={() => setCvPreviewOpen(false)}
+        cvUrl={cvUrl}
       />
     </>
   );

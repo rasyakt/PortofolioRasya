@@ -117,15 +117,8 @@ export default function ProfileIDCard({ name, headline, location, email, photoUr
               </span>
               <span className="badge badge-accent" style={{ fontSize: "9px" }}>STAFF ID</span>
             </div>
-            {/* Lanyard slot */}
-            <div className="flex justify-center pt-2.5" aria-hidden="true">
-              <div
-                className="w-14 h-[7px] rounded-full"
-                style={{ background: "rgba(0,0,0,0.45)", border: "1px solid var(--border-strong)" }}
-              />
-            </div>
 
-            <div className="p-4 pt-2.5">
+            <div className="p-4 pt-3">
               {/* Photo */}
               <div
                 className="relative w-full overflow-hidden rounded-xl mb-3"
