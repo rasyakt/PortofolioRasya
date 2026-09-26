@@ -9,6 +9,10 @@ RUN npm ci --ignore-scripts
 # ---------- builder ----------
 FROM node:22-alpine AS builder
 WORKDIR /app
+# OpenSSL 3 must exist BEFORE `prisma generate` so Prisma downloads the
+# linux-musl-openssl-3.0.x engine (otherwise it defaults to the 1.1.x
+# engine, which cannot load on Alpine and fails the build).
+RUN apk add --no-cache openssl libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
