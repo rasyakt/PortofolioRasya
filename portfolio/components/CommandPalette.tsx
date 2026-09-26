@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, FolderOpen, Download, Mail, ExternalLink, User, LayoutGrid, Award, Terminal, Moon, Copy } from "lucide-react";
+import { Search, FolderOpen, Download, Mail, ExternalLink, User, LayoutGrid, Award, Terminal, Copy } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "./icons/BrandIcons";
 import Fuse from "fuse.js";
 import { track } from "@/lib/analytics";
@@ -39,7 +38,6 @@ const FALLBACK_CONTACT = {
 };
 
 export default function CommandPalette({ open, onClose, contact }: CommandPaletteProps) {
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
@@ -173,18 +171,7 @@ export default function CommandPalette({ open, onClose, contact }: CommandPalett
       },
       keywords: ["resume", "cv", "download"],
     },
-    {
-      id: "admin",
-      label: "Open Admin CMS",
-      category: "System",
-      icon: <Moon size={15} />,
-      action: () => {
-        router.push("/admin");
-        handleClose();
-      },
-      keywords: ["admin", "cms", "dashboard"],
-    },
-  ], [scrollTo, copyToClipboard, handleClose, router, CONTACT]);
+  ], [scrollTo, copyToClipboard, handleClose, CONTACT]);
 
   const fuse = useMemo(() => new Fuse(COMMANDS, {
     keys: ["label", "category", "keywords"],

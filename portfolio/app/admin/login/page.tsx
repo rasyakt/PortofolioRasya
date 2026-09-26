@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
       router.push("/admin");
       router.refresh();
     } else {
-      setError("Invalid username or password");
+      setError(result.error || "Invalid username or password");
       setLoading(false);
     }
   };
@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
                 style={{ paddingLeft: "36px" }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="rasya"
+                placeholder="Enter your username"
                 required
                 autoFocus
               />

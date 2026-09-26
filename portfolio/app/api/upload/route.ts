@@ -17,6 +17,28 @@ const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB
 
 const ALLOWED_FOLDERS = new Set(["covers", "badges", "docs"]);
 
+/** Verify the file's magic bytes match its claimed MIME type. */
+function sniffMatches(buffer: Buffer, mime: string): boolean {
+  const b = buffer;
+  const startsWith = (sig: number[]) => sig.every((byte, i) => b[i] === byte);
+  const textAt = (offset: number, text: string) =>
+    b.slice(offset, offset + text.length).toString("ascii") === text;
+  switch (mime) {
+    case "image/png":
+      return startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    case "image/jpeg":
+      return startsWith([0xff, 0xd8, 0xff]);
+    case "image/gif":
+      return textAt(0, "GIF87a") || textAt(0, "GIF89a");
+    case "image/webp":
+      return textAt(0, "RIFF") && textAt(8, "WEBP");
+    case "application/pdf":
+      return textAt(0, "%PDF");
+    default:
+      return false;
+  }
+}
+
 /** Admin-only file upload. Images go to covers/badges, PDFs to docs. */
 export async function POST(req: Request) {
   try {
@@ -58,9 +80,16 @@ export async function POST(req: Request) {
 
     const dir = join(process.cwd(), "public", folder);
     await mkdir(dir, { recursive: true });
+    const bytes = Buffer.from(await file.arrayBuffer());
+    if (!sniffMatches(bytes, file.type)) {
+      return NextResponse.json(
+        { error: "File content does not match its type" },
+        { status: 400 }
+      );
+    }
     const prefix = folder === "badges" ? "badge" : folder === "docs" ? "doc" : "cover";
     const filename = `${prefix}-${Date.now()}-${randomUUID().slice(0, 8)}${ext || extname((file as File).name || "")}`;
-    await writeFile(join(dir, filename), Buffer.from(await file.arrayBuffer()));
+    await writeFile(join(dir, filename), bytes);
 
     return NextResponse.json({ url: `/${folder}/${filename}` });
   } catch {

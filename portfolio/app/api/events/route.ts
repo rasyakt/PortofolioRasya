@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const ALLOWED_TYPES = new Set([
   "page_view",
@@ -11,6 +12,11 @@ const ALLOWED_TYPES = new Set([
 
 export async function POST(req: Request) {
   try {
+    const forwarded = req.headers.get("x-forwarded-for");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
+    if (!checkRateLimit(`events:${ip}`, 120, 60 * 1000)) {
+      return new NextResponse(null, { status: 429 });
+    }
     const body = await req.json().catch(() => null);
     const type = body?.type;
     const rawPath = typeof body?.path === "string" ? body.path : "/";
