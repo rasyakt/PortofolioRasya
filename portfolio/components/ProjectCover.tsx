@@ -14,16 +14,17 @@ interface ProjectCoverProps {
   category: string;
   coverImage?: string | null;
   height?: number;
+  className?: string;
 }
 
 /**
  * Project cover visual. Shows the real cover image when available,
  * otherwise a theme-aware monochrome pattern with a category mark.
  */
-export default function ProjectCover({ title, category, coverImage, height = 148 }: ProjectCoverProps) {
+export default function ProjectCover({ title, category, coverImage, height = 148, className = "" }: ProjectCoverProps) {
   if (coverImage) {
     return (
-      <div className="relative overflow-hidden" style={{ height }}>
+      <div className={`relative overflow-hidden ${className}`} style={{ height }}>
         <Image
           src={coverImage}
           alt={title}
@@ -38,21 +39,21 @@ export default function ProjectCover({ title, category, coverImage, height = 148
 
   return (
     <div
-      className="relative overflow-hidden"
+      className={`relative overflow-hidden ${className}`}
       style={{
         height,
         background: "var(--bg-elevated)",
         color: "var(--text-muted)",
       }}
     >
-      {/* Dot pattern */}
+      {/* Dot pattern (single shared id — identical on every card) */}
       <svg className="absolute inset-0 w-full h-full" aria-hidden="true">
         <defs>
-          <pattern id={`dots-${category}`} width="18" height="18" patternUnits="userSpaceOnUse">
+          <pattern id="project-cover-dots" width="18" height="18" patternUnits="userSpaceOnUse">
             <circle cx="1.5" cy="1.5" r="1" fill="currentColor" opacity="0.35" />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill={`url(#dots-${category})`} />
+        <rect width="100%" height="100%" fill="url(#project-cover-dots)" />
       </svg>
       {/* Accent bar */}
       <div

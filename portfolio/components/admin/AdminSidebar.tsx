@@ -5,16 +5,26 @@ import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/actions/profile";
 import {
   LayoutDashboard, FolderOpen, Award, User, LogOut, Terminal, ExternalLink,
+  Briefcase, Layers,
 } from "lucide-react";
+import ThemeToggle from "../ThemeToggle";
 
 const NAV = [
   { icon: <LayoutDashboard size={16} />, label: "Dashboard", href: "/admin" },
   { icon: <FolderOpen size={16} />, label: "Projects", href: "/admin/projects" },
   { icon: <Award size={16} />, label: "Certifications", href: "/admin/certifications" },
+  { icon: <Briefcase size={16} />, label: "Experience", href: "/admin/experience" },
+  { icon: <Layers size={16} />, label: "Skills", href: "/admin/skills" },
   { icon: <User size={16} />, label: "Profile", href: "/admin/profile" },
 ];
 
-export default function AdminSidebar({ username }: { username: string }) {
+export default function AdminSidebar({
+  username,
+  onNavigate,
+}: {
+  username: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
@@ -23,7 +33,7 @@ export default function AdminSidebar({ username }: { username: string }) {
       <div className="flex items-center gap-2 mb-8 px-2 pt-2">
         <div
           className="p-1.5 rounded-lg"
-          style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-border)" }}
+          style={{ background: "var(--accent-soft)", border: "1px solid var(--accent-border)" }}
         >
           <Terminal size={14} style={{ color: "var(--accent)" }} />
         </div>
@@ -47,6 +57,7 @@ export default function AdminSidebar({ username }: { username: string }) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={`admin-nav-item ${isActive ? "active" : ""}`}
             >
               {item.icon}
@@ -58,6 +69,12 @@ export default function AdminSidebar({ username }: { username: string }) {
 
       {/* Bottom */}
       <div className="space-y-1 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center justify-between px-3 py-1.5">
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Appearance
+          </span>
+          <ThemeToggle />
+        </div>
         <a
           href="/"
           target="_blank"

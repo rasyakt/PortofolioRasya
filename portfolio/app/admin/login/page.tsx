@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginAdmin } from "@/actions/profile";
 import { Terminal, Eye, EyeOff, Lock, User } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -30,22 +31,25 @@ export default function AdminLoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center grid-bg"
+      className="min-h-screen flex items-center justify-center relative"
       style={{ background: "var(--bg-base)" }}
     >
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div
         className="w-full max-w-sm p-8 rounded-2xl"
         style={{
           background: "var(--bg-surface)",
           border: "1px solid var(--border)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+          boxShadow: "var(--card-shadow)",
         }}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 mb-8">
           <div
             className="p-2.5 rounded-xl"
-            style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-border)" }}
+            style={{ background: "var(--accent-soft)", border: "1px solid var(--accent-border)" }}
           >
             <Terminal size={18} style={{ color: "var(--accent)" }} />
           </div>
@@ -63,7 +67,7 @@ export default function AdminLoginPage() {
           Sign in
         </h1>
         <p className="text-xs mb-6" style={{ color: "var(--text-muted)" }}>
-          Default: <span className="font-mono">rasya / admin123</span>
+          Authorized access only.
         </p>
 
         {error && (

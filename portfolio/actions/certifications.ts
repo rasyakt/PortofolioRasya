@@ -50,3 +50,35 @@ export async function deleteCertification(id: string) {
   revalidatePath("/admin/certifications");
   return { success: true };
 }
+
+export async function duplicateCertification(id: string) {
+  await requireAuth();
+  const src = await prisma.certification.findUnique({ where: { id } });
+  if (!src) throw new Error("Record not found");
+  const { id: _omitId, createdAt: _omitCreated, ...rest } = src;
+  void _omitId;
+  void _omitCreated;
+  const copy = await prisma.certification.create({
+    data: { ...rest, title: `${src.title} (Copy)` },
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true, cert: copy };
+}
+
+export async function moveCertification(id: string, direction: "up" | "down") {
+  await requireAuth();
+  const list = await prisma.certification.findMany({ orderBy: { order: "asc" } });
+  const idx = list.findIndex((c) => c.id === id);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
+  const a = list[idx];
+  const b = list[swapIdx];
+  await prisma.$transaction([
+    prisma.certification.update({ where: { id: a.id }, data: { order: b.order } }),
+    prisma.certification.update({ where: { id: b.id }, data: { order: a.order } }),
+  ]);
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true };
+}

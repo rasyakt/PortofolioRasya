@@ -10,7 +10,7 @@
 Built with a **"High-Craft Engineering & Editorial Minimalism"** design ethos inspired by Linear, Raycast, and Vercel:
 - **Obsidian Dark Palette**: Deep background (`#09090b`, `#121215`) with precise 1px borders (`zinc-800/60`).
 - **Zero "AI-Slop"**: No meaningless neon blur blobs or generic templates. Crisp typography hierarchy, refined emerald accents (`#10b981`), and subtle micro-interactions.
-- **Performance First**: Built on Next.js 16 (Turbopack), React 19, SQLite with Prisma ORM v5, and Framer Motion.
+- **Performance First**: Built on Next.js 16 (Turbopack), React 19, MySQL with Prisma ORM v5, and Framer Motion.
 
 ---
 
@@ -54,7 +54,7 @@ Built with a **"High-Craft Engineering & Editorial Minimalism"** design ethos in
 
 - **Framework**: Next.js 16 (App Router, Turbopack, Server Actions)
 - **Language**: TypeScript
-- **Database & ORM**: SQLite + Prisma ORM v5
+- **Database & ORM**: MySQL 8 + Prisma ORM v5
 - **Styling**: Tailwind CSS + Custom CSS Design System
 - **Animations**: Framer Motion
 - **Icons**: Lucide React + Custom SVG Brand Icons
@@ -78,7 +78,7 @@ cp .env.example .env
 
 | Variable | Description | Default |
 |---|---|---|
-| `DATABASE_URL` | SQLite database path (relative to `prisma/`) | `file:./dev.db` |
+| `DATABASE_URL` | MySQL connection string (`mysql://USER:PASSWORD@HOST:PORT/DATABASE`) | `mysql://root:@localhost:3306/portofoliorasya` |
 | `SESSION_SECRET` | Secret used to sign the admin session cookie | — |
 | `NEXTAUTH_URL` | Public URL of the app | `http://localhost:3000` |
 

@@ -15,13 +15,38 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [active, setActive] = useState("");
   const { open } = useCommandPalette();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 16);
+    let lastY = window.scrollY;
+    const handler = () => {
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      setHidden(y > 320 && y > lastY);
+      lastY = y;
+    };
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  useEffect(() => {
+    const ids = NAV_LINKS.map((l) => l.href.slice(1));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(`#${e.target.id}`);
+        }
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
   }, []);
 
   const scrollTo = (href: string) => {
@@ -32,8 +57,8 @@ export default function Navbar() {
   return (
     <motion.header
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      animate={{ opacity: 1, y: mobileOpen ? "0%" : hidden ? "-100%" : "0%" }}
+      transition={{ duration: 0.25 }}
       className="fixed top-0 left-0 right-0 z-50 transition-colors duration-200"
       style={{
         background: scrolled ? "color-mix(in srgb, var(--bg-base) 85%, transparent)" : "transparent",
@@ -58,6 +83,7 @@ export default function Navbar() {
               key={link.label}
               onClick={() => scrollTo(link.href)}
               className="px-3 py-1.5 text-[13px] t-secondary transition-colors cursor-pointer bg-transparent border-none"
+              style={active === link.href ? { color: "var(--accent)" } : undefined}
             >
               {link.label}
             </button>
@@ -107,6 +133,7 @@ export default function Navbar() {
                     key={link.label}
                     onClick={() => scrollTo(link.href)}
                     className="block w-full text-left px-2 py-2.5 text-sm t-secondary cursor-pointer bg-transparent border-none"
+                    style={active === link.href ? { color: "var(--accent)" } : undefined}
                   >
                     {link.label}
                   </button>

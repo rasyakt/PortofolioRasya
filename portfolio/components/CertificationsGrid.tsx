@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { Shield, Award, Star, ExternalLink } from "lucide-react";
 
@@ -41,6 +42,27 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
   const hkiCerts = certs.filter((c) => c.type === "hki");
   const other = certs.filter((c) => c.type !== "hki");
 
+  const renderMark = (cert: Certification, fallback: React.ReactNode) => {
+    if (cert.badgeImage) {
+      return (
+        <span
+          className="relative block w-10 h-10 rounded-lg overflow-hidden shrink-0"
+          style={{ border: "1px solid var(--border)" }}
+        >
+          <Image
+            src={cert.badgeImage}
+            alt={cert.title}
+            fill
+            sizes="40px"
+            style={{ objectFit: "cover" }}
+            unoptimized
+          />
+        </span>
+      );
+    }
+    return fallback;
+  };
+
   return (
     <section id="certifications" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
       {/* Header */}
@@ -69,7 +91,9 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
               transition={{ duration: 0.35, delay: i * 0.08 }}
               className="card card-hover p-5"
             >
-              <Shield size={16} style={{ color: "var(--amber)" }} className="mb-4" />
+              <div className="mb-4">
+                {renderMark(cert, <Shield size={16} style={{ color: "var(--amber)" }} />)}
+              </div>
               <p className="font-semibold text-sm mb-1" style={{ color: "var(--text-primary)" }}>
                 {cert.title}
               </p>
@@ -111,7 +135,7 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
               className="card card-hover p-4"
             >
               <div className="flex items-start justify-between gap-2 mb-3">
-                <span style={{ color: "var(--text-muted)" }}>{cfg.icon}</span>
+                {renderMark(cert, <span style={{ color: "var(--text-muted)" }}>{cfg.icon}</span>)}
                 {cert.credentialUrl && (
                   <a
                     href={cert.credentialUrl}

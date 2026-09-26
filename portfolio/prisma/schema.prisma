@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,16 +15,16 @@ model Project {
   title       String
   slug        String   @unique
   category    String   // "enterprise" | "mobile" | "ai" | "systems" | "fullstack"
-  description String
-  longDesc    String?
-  problem     String?
-  solution    String?
-  architecture String?
-  impact      String?
-  techStack   String   // JSON array stored as string
-  liveUrl     String?
-  githubUrl   String?
-  coverImage  String?
+  description String   @db.Text
+  longDesc    String?  @db.Text
+  problem     String?  @db.Text
+  solution    String?  @db.Text
+  architecture String? @db.Text
+  impact      String?  @db.Text
+  techStack   String   @db.Text // JSON array stored as string
+  liveUrl     String?  @db.Text
+  githubUrl   String?  @db.Text
+  coverImage  String?  @db.Text
   hkiNumber   String?  // Kemenkumham registration number
   featured    Boolean  @default(false)
   order       Int      @default(0)
@@ -37,8 +37,8 @@ model Certification {
   title       String
   issuer      String
   issueDate   String
-  credentialUrl String?
-  badgeImage  String?
+  credentialUrl String? @db.Text
+  badgeImage  String? @db.Text
   type        String   @default("cert") // "cert" | "hki" | "award"
   regNumber   String?
   order       Int      @default(0)
@@ -50,7 +50,7 @@ model ProfileConfig {
   id              String   @id @default(cuid())
   name            String   @default("Rasya Syahreza Maulana Zen")
   headline        String   @default("Fullstack Mobile & Web Developer | AI Engineer | CTO at BotHax")
-  bio             String
+  bio             String   @db.Text
   location        String   @default("Ciamis, West Java, Indonesia")
   email           String   @default("rasyasyahrezamaulanazen@gmail.com")
   phone           String   @default("+62 838 4055 9238")
@@ -58,6 +58,7 @@ model ProfileConfig {
   linkedin        String   @default("https://linkedin.com/in/rasya-syahreza")
   portfolioUrl    String   @default("https://gasela.my.id")
   cvUrl           String?
+  photoUrl        String?  @db.Text
   isAvailable     Boolean  @default(true)
   availabilityText String  @default("Open for Industrial Internship / Full-time roles")
   updatedAt       DateTime @updatedAt
@@ -74,4 +75,34 @@ model PageView {
   id        String   @id @default(cuid())
   path      String
   createdAt DateTime @default(now())
+}
+
+model SiteEvent {
+  id        String   @id @default(cuid())
+  type      String   // "page_view" | "cv_download" | "recruiter_open" | "project_open" | "contact_click"
+  path      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+}
+
+model Experience {
+  id        String   @id @default(cuid())
+  year      String
+  role      String
+  company   String
+  points    String   @db.Text // JSON array stored as string
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  kind      String   @default("tech") // "area" | "tech"
+  title     String
+  desc      String?  @db.Text
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

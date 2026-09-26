@@ -13,7 +13,20 @@ const CommandPaletteContext = createContext<{
   isOpen: false,
 });
 
-export function CommandPaletteProvider({ children }: { children: React.ReactNode }) {
+export interface PaletteContact {
+  email: string;
+  phone: string;
+  github: string;
+  linkedin: string;
+}
+
+export function CommandPaletteProvider({
+  children,
+  contact,
+}: {
+  children: React.ReactNode;
+  contact: PaletteContact;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const open = useCallback(() => setIsOpen(true), []);
@@ -33,7 +46,7 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
   return (
     <CommandPaletteContext.Provider value={{ open, close, isOpen }}>
       {children}
-      <CommandPalette open={isOpen} onClose={close} />
+      <CommandPalette open={isOpen} onClose={close} contact={contact} />
     </CommandPaletteContext.Provider>
   );
 }

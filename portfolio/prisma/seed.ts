@@ -337,6 +337,83 @@ const CERTIFICATIONS = [
   },
 ];
 
+const EXPERIENCES = [
+  {
+    year: "2023 – Present",
+    role: "Chief Technology Officer",
+    company: "BotHax",
+    order: 1,
+    points: [
+      "Own full technical architecture across all BotHax products",
+      "Automation scripting, hardware & network administration",
+      "System maintenance, security hardening, performance optimization",
+    ],
+  },
+  {
+    year: "2026",
+    role: "LKS West Java Delegate — Web Technologies",
+    company: "Dinas Pendidikan Jawa Barat",
+    order: 2,
+    points: [
+      "Provincial-level vocational skill competition",
+      "Representing SMK Negeri 1 Ciamis",
+    ],
+  },
+  {
+    year: "2026",
+    role: "3× Kemenkumham IP Copyright Holder",
+    company: "DJKI Kemenkumham RI",
+    order: 3,
+    points: [
+      "ARTIKA-POS — Reg. No. 001416260",
+      "ETAMU-KCD — Reg. No. 001449497",
+      "Calakan — Reg. No. 001448869",
+    ],
+  },
+  {
+    year: "2025 – 2026",
+    role: "School Software Showcase Lead",
+    company: "SMK Negeri 1 Ciamis",
+    order: 4,
+    points: [
+      "5+ internal systems in daily production use",
+      "Mentored peers in web development and system design",
+    ],
+  },
+  {
+    year: "2025",
+    role: "AI Top Graduate",
+    company: "IBM SkillsBuild × Hacktiv8",
+    order: 5,
+    points: ["Agentic AI workflows, LLM orchestration, RAG, MLOps"],
+  },
+  {
+    year: "2024 – 2027",
+    role: "Software & Game Development Student",
+    company: "SMK Negeri 1 Ciamis (PPLG / RPL)",
+    order: 6,
+    points: ["Building production systems alongside studies"],
+  },
+];
+
+const SKILLS = [
+  { kind: "area", title: "Web Systems", desc: "Enterprise dashboards, POS ecosystems, and school information systems — Laravel, Next.js, NestJS.", order: 1 },
+  { kind: "area", title: "Mobile Apps", desc: "Cross-platform and native apps shipped to real users — Flutter, React Native, Kotlin.", order: 2 },
+  { kind: "area", title: "AI Engineering", desc: "Agentic workflows, RAG pipelines, and LLM integrations — Python, MLOps practices.", order: 3 },
+  { kind: "tech", title: "Laravel", desc: null, order: 1 },
+  { kind: "tech", title: "Next.js", desc: null, order: 2 },
+  { kind: "tech", title: "TypeScript", desc: null, order: 3 },
+  { kind: "tech", title: "NestJS", desc: null, order: 4 },
+  { kind: "tech", title: "Flutter", desc: null, order: 5 },
+  { kind: "tech", title: "Python", desc: null, order: 6 },
+  { kind: "tech", title: "PostgreSQL", desc: null, order: 7 },
+  { kind: "tech", title: "MySQL", desc: null, order: 8 },
+  { kind: "tech", title: "Docker", desc: null, order: 9 },
+  { kind: "tech", title: "Git", desc: null, order: 10 },
+  { kind: "tech", title: "Linux", desc: null, order: 11 },
+  { kind: "tech", title: "Figma", desc: null, order: 12 },
+];
+
 async function main() {
   console.log("🌱 Seeding database...");
 
@@ -385,6 +462,20 @@ async function main() {
     },
   });
   console.log("✅ Created admin user (username: rasya, password: admin123)");
+
+  // Seed experiences & skills only when empty (safe to re-run)
+  if ((await prisma.experience.count()) === 0) {
+    for (const e of EXPERIENCES) {
+      await prisma.experience.create({ data: { ...e, points: JSON.stringify(e.points) } });
+    }
+    console.log(`✅ Created ${EXPERIENCES.length} experiences`);
+  }
+  if ((await prisma.skill.count()) === 0) {
+    for (const s of SKILLS) {
+      await prisma.skill.create({ data: s });
+    }
+    console.log(`✅ Created ${SKILLS.length} skills`);
+  }
 
   console.log("🎉 Database seeded successfully!");
 }

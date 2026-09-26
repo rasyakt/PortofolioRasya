@@ -1,6 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { FolderOpen, Award, Users, BarChart3, ExternalLink } from "lucide-react";
+import { FolderOpen, Award, Users, BarChart3, ExternalLink, Eye, Download, Briefcase, MousePointerClick, Layers } from "lucide-react";
 import Link from "next/link";
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const thirtyDaysAgo = () => new Date(Date.now() - THIRTY_DAYS_MS);
+
+const EVENT_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
+  page_view: { label: "Page views", icon: <Eye size={18} /> },
+  cv_download: { label: "CV downloads", icon: <Download size={18} /> },
+  recruiter_open: { label: "Recruiter opens", icon: <Briefcase size={18} /> },
+  project_open: { label: "Project opens", icon: <MousePointerClick size={18} /> },
+  contact_click: { label: "Contact clicks", icon: <ExternalLink size={18} /> },
+};
 
 export default async function AdminDashboard() {
   const [projectCount, certCount, profile] = await Promise.all([
@@ -9,6 +20,17 @@ export default async function AdminDashboard() {
     prisma.profileConfig.findFirst(),
   ]);
   const featuredCount = await prisma.project.count({ where: { featured: true } });
+  const categoryGroups = await prisma.project.groupBy({ by: ["category"] });
+  const [experienceCount, skillCount] = await Promise.all([
+    prisma.experience.count(),
+    prisma.skill.count(),
+  ]);
+  const eventGroups = await prisma.siteEvent.groupBy({
+    by: ["type"],
+    where: { createdAt: { gte: thirtyDaysAgo() } },
+    _count: { type: true },
+  });
+  const eventCounts = Object.fromEntries(eventGroups.map((g) => [g.type, g._count.type]));
 
   return (
     <div className="p-8">
@@ -26,9 +48,11 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { icon: <FolderOpen size={18} />, label: "Total Projects", value: projectCount, color: "var(--accent)", href: "/admin/projects" },
-          { icon: <Award size={18} />, label: "Certifications", value: certCount, color: "#fbbf24", href: "/admin/certifications" },
-          { icon: <Users size={18} />, label: "Featured", value: featuredCount, color: "#38bdf8", href: "/admin/projects" },
-          { icon: <BarChart3 size={18} />, label: "Categories", value: 5, color: "#a78bfa", href: "/admin/projects" },
+          { icon: <Award size={18} />, label: "Certifications", value: certCount, color: "var(--amber)", href: "/admin/certifications" },
+          { icon: <Users size={18} />, label: "Featured", value: featuredCount, color: "var(--info)", href: "/admin/projects" },
+          { icon: <BarChart3 size={18} />, label: "Categories", value: categoryGroups.length, color: "var(--violet)", href: "/admin/projects" },
+          { icon: <Briefcase size={18} />, label: "Experience", value: experienceCount, color: "var(--accent)", href: "/admin/experience" },
+          { icon: <Layers size={18} />, label: "Skills", value: skillCount, color: "var(--info)", href: "/admin/skills" },
         ].map((s) => (
           <Link
             key={s.label}
@@ -56,10 +80,24 @@ export default async function AdminDashboard() {
         </Link>
       </div>
 
+      {/* Site analytics — last 30 days */}
+      <div className="mb-8">
+        <p className="section-label mb-3">Analytics — last 30 days</p>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          {Object.entries(EVENT_LABELS).map(([type, cfg]) => (
+            <div key={type} className="card p-4">
+              <div className="t-muted mb-2">{cfg.icon}</div>
+              <p className="text-2xl font-bold font-mono t-primary">{eventCounts[type] ?? 0}</p>
+              <p className="text-xs mt-1 t-secondary">{cfg.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Status card */}
       <div
         className="p-5 rounded-xl flex items-center justify-between"
-        style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-border)" }}
+        style={{ background: "var(--accent-soft)", border: "1px solid var(--accent-border)" }}
       >
         <div>
           <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>

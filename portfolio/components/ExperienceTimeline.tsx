@@ -4,72 +4,26 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Briefcase, GraduationCap, Trophy, Code2 } from "lucide-react";
 
-const TIMELINE = [
-  {
-    year: "2023 – Present",
-    role: "Chief Technology Officer",
-    company: "BotHax",
-    icon: <Briefcase size={14} />,
-    points: [
-      "Own full technical architecture across all BotHax products",
-      "Automation scripting, hardware & network administration",
-      "System maintenance, security hardening, performance optimization",
-    ],
-  },
-  {
-    year: "2026",
-    role: "LKS West Java Delegate — Web Technologies",
-    company: "Dinas Pendidikan Jawa Barat",
-    icon: <Trophy size={14} />,
-    points: [
-      "Provincial-level vocational skill competition",
-      "Representing SMK Negeri 1 Ciamis",
-    ],
-  },
-  {
-    year: "2026",
-    role: "3× Kemenkumham IP Copyright Holder",
-    company: "DJKI Kemenkumham RI",
-    icon: <Trophy size={14} />,
-    points: [
-      "ARTIKA-POS — Reg. No. 001416260",
-      "ETAMU-KCD — Reg. No. 001449497",
-      "Calakan — Reg. No. 001448869",
-    ],
-  },
-  {
-    year: "2025 – 2026",
-    role: "School Software Showcase Lead",
-    company: "SMK Negeri 1 Ciamis",
-    icon: <Code2 size={14} />,
-    points: [
-      "5+ internal systems in daily production use",
-      "Mentored peers in web development and system design",
-    ],
-  },
-  {
-    year: "2025",
-    role: "AI Top Graduate",
-    company: "IBM SkillsBuild × Hacktiv8",
-    icon: <Trophy size={14} />,
-    points: [
-      "Agentic AI workflows, LLM orchestration, RAG, MLOps",
-    ],
-  },
-  {
-    year: "2024 – 2027",
-    role: "Software & Game Development Student",
-    company: "SMK Negeri 1 Ciamis (PPLG / RPL)",
-    icon: <GraduationCap size={14} />,
-    points: [
-      "Building production systems alongside studies",
-    ],
-  },
-];
+export interface TimelineItem {
+  year: string;
+  role: string;
+  company: string;
+  points: string[];
+}
 
-export default function ExperienceTimeline() {
+function pickIcon(role: string, company: string) {
+  const text = `${role} ${company}`.toLowerCase();
+  if (/lks|hki|copyright|award|graduate|delegate/.test(text)) return <Trophy size={14} />;
+  if (/student|school|education|smk|university|mentor/.test(text)) return <GraduationCap size={14} />;
+  if (/cto|chief|lead|architect|manager/.test(text)) return <Briefcase size={14} />;
+  return <Code2 size={14} />;
+}
+
+export default function ExperienceTimeline({ items }: { items: TimelineItem[] }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  if (items.length === 0) return null;
 
   return (
     <section id="experience" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
@@ -81,20 +35,24 @@ export default function ExperienceTimeline() {
       >
         <p className="section-label mb-2">Journey</p>
         <h2 className="section-title">Experience</h2>
-        <p className="section-desc">From student to CTO.</p>
+        <p className="section-desc">{items.length} roles & milestones.</p>
       </motion.div>
 
       <div className="relative">
-        {/* Vertical line */}
-        <div
-          className="absolute left-[15px] top-1 bottom-1 w-px"
-          style={{ background: "var(--border)" }}
+        {/* Vertical line — draws in on scroll */}
+        <motion.div
+          initial={{ scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className="absolute left-[15px] top-1 bottom-1 w-px origin-top"
+          style={{ background: "var(--border-strong)" }}
         />
 
         <div className="space-y-3">
-          {TIMELINE.map((item, i) => (
+          {items.map((item, i) => (
             <motion.div
-              key={i}
+              key={`${item.role}-${i}`}
               initial={{ opacity: 0, y: 12 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.35, delay: i * 0.06 }}
@@ -109,27 +67,29 @@ export default function ExperienceTimeline() {
                   color: "var(--text-secondary)",
                 }}
               >
-                {item.icon}
+                {pickIcon(item.role, item.company)}
               </div>
 
               {/* Card */}
               <div className="card card-hover p-5">
-                <p className="text-[11px] font-mono mb-1" style={{ color: "var(--text-muted)" }}>
+                <p className="text-[11px] font-mono t-muted mb-1">
                   {item.year}
                 </p>
-                <h3 className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
+                <h3 className="font-semibold text-sm t-primary">
                   {item.role}
                 </h3>
-                <p className="text-xs mt-0.5 mb-3" style={{ color: "var(--text-muted)" }}>
+                <p className="text-xs t-muted mt-0.5 mb-3">
                   {item.company}
                 </p>
-                <ul className="space-y-1">
-                  {item.points.map((pt, j) => (
-                    <li key={j} className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                      {pt}
-                    </li>
-                  ))}
-                </ul>
+                {item.points.length > 0 && (
+                  <ul className="space-y-1">
+                    {item.points.map((pt, j) => (
+                      <li key={j} className="text-[13px] leading-relaxed t-secondary">
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </motion.div>
           ))}

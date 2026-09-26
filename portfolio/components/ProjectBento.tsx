@@ -3,39 +3,22 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
-const EXPERTISE = [
-  {
-    title: "Web Systems",
-    desc: "Enterprise dashboards, POS ecosystems, and school information systems — Laravel, Next.js, NestJS.",
-  },
-  {
-    title: "Mobile Apps",
-    desc: "Cross-platform and native apps shipped to real users — Flutter, React Native, Kotlin.",
-  },
-  {
-    title: "AI Engineering",
-    desc: "Agentic workflows, RAG pipelines, and LLM integrations — Python, MLOps practices.",
-  },
-];
+export interface ExpertiseArea {
+  title: string;
+  desc: string;
+}
 
-const STACK = [
-  "Laravel",
-  "Next.js",
-  "TypeScript",
-  "NestJS",
-  "Flutter",
-  "Python",
-  "PostgreSQL",
-  "MySQL",
-  "Docker",
-  "Git",
-  "Linux",
-  "Figma",
-];
-
-export default function ProjectBento() {
+export default function ProjectBento({
+  areas,
+  tech,
+}: {
+  areas: ExpertiseArea[];
+  tech: string[];
+}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  if (areas.length === 0 && tech.length === 0) return null;
 
   return (
     <section id="bento" ref={ref} className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
@@ -52,53 +35,51 @@ export default function ProjectBento() {
 
       <div className="grid lg:grid-cols-12 gap-4">
         {/* Expertise list */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="lg:col-span-7 card p-6 sm:p-7"
-        >
-          <div className="space-y-6">
-            {EXPERTISE.map((item, i) => (
-              <div
-                key={item.title}
-                className={i > 0 ? "pt-6" : ""}
-                style={i > 0 ? { borderTop: "1px solid var(--border)" } : undefined}
-              >
-                <p className="text-sm font-semibold t-primary mb-1">{item.title}</p>
-                <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                  {item.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+        {areas.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="lg:col-span-7 card p-6 sm:p-7"
+          >
+            <div className="space-y-6">
+              {areas.map((item, i) => (
+                <div
+                  key={item.title}
+                  className={i > 0 ? "pt-6" : ""}
+                  style={i > 0 ? { borderTop: "1px solid var(--border)" } : undefined}
+                >
+                  <p className="text-sm font-semibold t-primary mb-1">{item.title}</p>
+                  <p className="text-[13px] leading-relaxed t-secondary">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Stack */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="lg:col-span-5 card p-6 sm:p-7 flex flex-col"
-        >
-          <p className="text-sm font-semibold t-primary mb-1">Preferred stack</p>
-          <p className="text-[13px] mb-5" style={{ color: "var(--text-muted)" }}>
-            Tools I reach for first.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {STACK.map((tech) => (
-              <span key={tech} className="badge">
-                {tech}
-              </span>
-            ))}
-          </div>
-          <p
-            className="text-xs font-mono"
-            style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border)", marginTop: "24px", paddingTop: "20px" }}
+        {tech.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="lg:col-span-5 card p-6 sm:p-7 flex flex-col"
           >
-            IBM SkillsBuild × Hacktiv8 — AI Top Graduate
-          </p>
-        </motion.div>
+            <p className="text-sm font-semibold t-primary mb-1">Preferred stack</p>
+            <p className="text-[13px] t-muted mb-5">
+              Tools I reach for first.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {tech.map((t) => (
+                <span key={t} className="badge">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
     </section>
   );

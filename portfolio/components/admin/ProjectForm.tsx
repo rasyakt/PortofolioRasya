@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createProject, updateProject } from "@/actions/projects";
-import { Save, X } from "lucide-react";
+import { Save, X, Upload, Trash2 } from "lucide-react";
+import { toast } from "../ui/Toaster";
+import { useFormGuard } from "@/lib/form-guard";
 
 interface Project {
   id?: string;
@@ -94,9 +97,34 @@ export default function ProjectForm({ project }: { project?: Project }) {
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormGuard(dirty, () => formRef.current?.requestSubmit());
 
-  const set = (key: keyof Project, val: string | boolean | number) =>
+  const handleCoverSelect = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error ?? "Upload failed");
+      set("coverImage", json.url);
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const set = (key: keyof Project, val: string | boolean | number) => {
+    setDirty(true);
     setData((d) => ({ ...d, [key]: val }));
+  };
 
   const autoSlug = (title: string) =>
     title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -122,6 +150,8 @@ export default function ProjectForm({ project }: { project?: Project }) {
       } else {
         await createProject(payload);
       }
+      setDirty(false);
+      toast("Project saved");
       router.push("/admin/projects");
       router.refresh();
     } catch (err: unknown) {
@@ -132,7 +162,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 max-w-3xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="p-8 max-w-3xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="section-label mb-1">CMS</p>
@@ -148,7 +178,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
           >
             <X size={14} /> Cancel
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving} title="Save (Ctrl+S)">
             <Save size={14} /> {saving ? "Saving..." : "Save Project"}
           </button>
         </div>
@@ -263,7 +293,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
           <input
             className="input-base font-mono"
             value={techInput}
-            onChange={(e) => setTechInput(e.target.value)}
+            onChange={(e) => { setDirty(true); setTechInput(e.target.value); }}
             placeholder="Laravel 12, MySQL, Tailwind CSS, PHP"
           />
         </div>
@@ -330,13 +360,54 @@ export default function ProjectForm({ project }: { project?: Project }) {
           placeholder="001416260"
         />
 
-        {/* Cover */}
-        <FormField
-          label="Cover Image URL (kosongkan = pola otomatis)"
-          value={data.coverImage ?? ""}
-          onChange={(val) => set("coverImage", val)}
-          placeholder="https://... atau /covers/nama.png (taruh file di public/covers/)"
-        />
+        {/* Cover upload */}
+        <div>
+          <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Cover Image (upload — PNG/JPG/WebP/GIF, maks 5 MB)
+          </label>
+          {data.coverImage ? (
+            <div className="flex items-start gap-4">
+              <div className="relative w-48 h-28 rounded-lg overflow-hidden shrink-0" style={{ border: "1px solid var(--border)" }}>
+                <Image
+                  src={data.coverImage}
+                  alt="Cover preview"
+                  fill
+                  sizes="192px"
+                  style={{ objectFit: "cover" }}
+                  unoptimized
+                />
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ fontSize: "12px", padding: "6px 12px" }}
+                onClick={() => set("coverImage", "")}
+              >
+                <Trash2 size={13} /> Remove
+              </button>
+            </div>
+          ) : (
+            <label
+              className="flex items-center justify-center gap-2 p-6 rounded-xl cursor-pointer transition-colors"
+              style={{ border: "1px dashed var(--border-strong)", color: "var(--text-muted)" }}
+            >
+              <Upload size={15} />
+              <span className="text-xs font-medium">
+                {uploading ? "Uploading..." : "Pilih file gambar..."}
+              </span>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => handleCoverSelect(e.target.files?.[0])}
+              />
+            </label>
+          )}
+          {uploadError && (
+            <p className="text-xs mt-2" style={{ color: "#f87171" }}>{uploadError}</p>
+          )}
+        </div>
       </div>
     </form>
   );

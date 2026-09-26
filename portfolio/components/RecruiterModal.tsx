@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -14,32 +14,60 @@ import {
   CheckCircle2,
   ExternalLink,
 } from "lucide-react";
+import type { ProfileConfig, Certification } from "@prisma/client";
 import { GithubIcon } from "./icons/BrandIcons";
+import { track } from "@/lib/analytics";
+import { copyText } from "@/lib/clipboard";
+import { toast } from "./ui/Toaster";
+import { useFocusTrap } from "@/lib/focus-trap";
 
 interface RecruiterModalProps {
   open: boolean;
   onClose: () => void;
+  profile: ProfileConfig | null;
+  hkiCerts: Certification[];
+  tech: string[];
+  projectCount: number;
 }
 
-const HKI_CERTS = [
-  { name: "ARTIKA-POS", reg: "001416260", date: "Aug 2026" },
-  { name: "ETAMU-KCD", reg: "001449497", date: "Aug 2026" },
-  { name: "Calakan", reg: "001448869", date: "Aug 2026" },
-];
-
-const CORE_SKILLS = [
-  { category: "Languages", items: ["PHP", "TypeScript", "Python", "Kotlin", "Go", "SQL"] },
-  { category: "Frameworks", items: ["Laravel 12/13", "Next.js", "NestJS", "React", "Flutter"] },
-  { category: "Databases", items: ["MySQL", "PostgreSQL", "SQLite", "MongoDB", "Supabase"] },
-  { category: "AI & Agents", items: ["LLM Workflows", "RAG", "Prompt Eng.", "MLOps"] },
-  { category: "Tools", items: ["Docker", "Git", "Nginx", "Figma", "Linux"] },
-];
-
-export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
+export default function RecruiterModal({
+  open,
+  onClose,
+  profile,
+  hkiCerts,
+  tech,
+  projectCount,
+}: RecruiterModalProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
-  const copy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onClose]);
+
+  const name = profile?.name || "Rasya Syahreza Maulana Zen";
+  const headline = profile?.headline || "Fullstack Developer · AI Engineer · CTO at BotHax";
+  const email = profile?.email || "rasyasyahrezamaulanazen@gmail.com";
+  const phone = profile?.phone || "+62 838 4055 9238";
+  const location = profile?.location || "Ciamis, West Java, Indonesia";
+  const github = profile?.github || "https://github.com/rasyakt";
+  const cvUrl = profile?.cvUrl || "/cv.pdf";
+  const available = profile ? profile.isAvailable : true;
+  const availabilityText = profile?.availabilityText || "Open for Internship / Full-time";
+  const waNumber = phone.replace(/\D/g, "");
+
+  const copy = async (text: string, label: string) => {
+    const ok = await copyText(text);
+    if (!ok) {
+      toast("Copy failed", "error");
+      return;
+    }
     setCopied(label);
     setTimeout(() => setCopied(null), 2000);
   };
@@ -54,18 +82,22 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Recruiter summary"
         >
           <motion.div
+            ref={dialogRef}
             className="w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide"
             style={{
               background: "var(--bg-surface)",
               border: "1px solid var(--border-strong)",
               borderRadius: "var(--radius)",
             }}
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+            initial={{ opacity: 0, scale: 0.97, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 20 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
+            exit={{ opacity: 0, scale: 0.97, y: 16 }}
+            transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -74,7 +106,6 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
               style={{
                 borderColor: "var(--border)",
                 background: "var(--bg-surface)",
-                backdropFilter: "blur(12px)",
               }}
             >
               <div className="flex items-center gap-3">
@@ -86,6 +117,7 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg link-hover cursor-pointer bg-transparent border-none"
+                aria-label="Close"
               >
                 <X size={16} />
               </button>
@@ -94,23 +126,27 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
             <div className="p-6 space-y-6">
               {/* Identity */}
               <div>
-                <h2 className="text-xl font-semibold t-primary tracking-tight">Rasya Syahreza Maulana Zen</h2>
-                <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>Fullstack Developer · AI Engineer · CTO at BotHax</p>
+                <h2 className="text-xl font-semibold t-primary tracking-tight">{name}</h2>
+                <p className="text-sm t-secondary mt-1">{headline}</p>
                 <div className="flex items-center gap-2 mt-3">
-                  <span className="status-available">
-                    <span className="status-dot" />
-                    Open for Internship / Full-time
-                  </span>
+                  {available ? (
+                    <span className="status-available">
+                      <span className="status-dot" />
+                      {availabilityText}
+                    </span>
+                  ) : (
+                    <span className="badge">{availabilityText}</span>
+                  )}
                 </div>
               </div>
 
               {/* Contact row */}
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { icon: <Mail size={14} />, label: "Email", value: "rasyasyahrezamaulanazen@gmail.com", copyKey: "email" },
-                  { icon: <Phone size={14} />, label: "WhatsApp", value: "+62 838 4055 9238", copyKey: "phone" },
-                  { icon: <MapPin size={14} />, label: "Location", value: "Ciamis, West Java, Indonesia", copyKey: null },
-                  { icon: <GithubIcon size={14} />, label: "GitHub", value: "github.com/rasyakt", copyKey: null, link: "https://github.com/rasyakt" },
+                  { icon: <Mail size={14} />, label: "Email", value: email, copyKey: "email" },
+                  { icon: <Phone size={14} />, label: "WhatsApp", value: phone, copyKey: "phone" },
+                  { icon: <MapPin size={14} />, label: "Location", value: location, copyKey: null },
+                  { icon: <GithubIcon size={14} />, label: "GitHub", value: github.replace("https://", ""), copyKey: null, link: github },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -124,14 +160,15 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
                     </div>
                     {item.copyKey && (
                       <button
-                        onClick={() => copy(item.value, item.copyKey!)}
+                        onClick={() => copy(item.label === "Email" ? email : phone, item.copyKey!)}
                         className="p-1 rounded icon-btn shrink-0"
+                        aria-label={`Copy ${item.label}`}
                       >
                         {copied === item.copyKey ? <CheckCircle2 size={12} style={{ color: "var(--accent)" }} /> : <Copy size={12} />}
                       </button>
                     )}
                     {item.link && (
-                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-1 rounded icon-btn shrink-0">
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="p-1 rounded icon-btn shrink-0" aria-label="Open GitHub">
                         <ExternalLink size={12} />
                       </a>
                     )}
@@ -142,60 +179,53 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
               {/* Key metrics */}
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { value: "12+", label: "Projects" },
-                  { value: "3x", label: "HKI Reg." },
+                  { value: `${projectCount}+`, label: "Projects" },
+                  { value: `${hkiCerts.length}x`, label: "HKI Reg." },
                   { value: "CTO", label: "BotHax" },
                   { value: "LKS", label: "Jabar 2026" },
                 ].map((m) => (
-                  <div
-                    key={m.label}
-                    className="text-center p-3 card"
-                  >
+                  <div key={m.label} className="text-center p-3 card">
                     <p className="text-lg font-semibold t-primary font-mono">{m.value}</p>
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>{m.label}</p>
+                    <p className="text-xs t-muted">{m.label}</p>
                   </div>
                 ))}
               </div>
 
               {/* HKI Intellectual Property */}
-              <div>
-                <p className="text-sm font-semibold t-primary mb-3">Kemenkumham Hak Cipta</p>
-                <div className="space-y-2">
-                  {HKI_CERTS.map((cert) => (
-                    <div
-                      key={cert.reg}
-                      className="flex items-center justify-between p-3 card"
-                    >
-                      <div>
-                        <p className="text-sm font-medium t-primary">{cert.name}</p>
-                        <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>Reg. No. {cert.reg}</p>
+              {hkiCerts.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold t-primary mb-3">Kemenkumham Hak Cipta</p>
+                  <div className="space-y-2">
+                    {hkiCerts.map((cert) => (
+                      <div key={cert.id} className="flex items-center justify-between p-3 card">
+                        <div>
+                          <p className="text-sm font-medium t-primary">{cert.title}</p>
+                          {cert.regNumber && (
+                            <p className="text-xs font-mono t-muted">Reg. No. {cert.regNumber}</p>
+                          )}
+                        </div>
+                        <span className="badge badge-hki">{cert.issueDate}</span>
                       </div>
-                      <span className="badge badge-hki">{cert.date}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Tech Skills */}
-              <div>
-                <p className="text-sm font-semibold t-primary mb-3">Core technical skills</p>
-                <div className="space-y-2">
-                  {CORE_SKILLS.map((group) => (
-                    <div key={group.category} className="flex gap-3 items-start">
-                      <span className="text-xs t-muted w-20 shrink-0 pt-0.5 font-mono">{group.category}</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {group.items.map((item) => (
-                          <span key={item} className="badge">{item}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+              {tech.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold t-primary mb-3">Technical stack</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {tech.map((t) => (
+                      <span key={t} className="badge">{t}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Education & Experience */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 card" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                <div className="p-4 card">
                   <div className="flex items-center gap-2 mb-2">
                     <GraduationCap size={14} className="t-muted" />
                     <p className="text-xs font-semibold t-secondary">Education</p>
@@ -204,7 +234,7 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
                   <p className="text-xs t-muted mt-0.5">Software & Game Dev (PPLG)</p>
                   <p className="text-xs t-muted mt-1 font-mono">2024 – 2027</p>
                 </div>
-                <div className="p-4 card" style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                <div className="p-4 card">
                   <div className="flex items-center gap-2 mb-2">
                     <Briefcase size={14} className="t-muted" />
                     <p className="text-xs font-semibold t-secondary">Current Role</p>
@@ -215,28 +245,22 @@ export default function RecruiterModal({ open, onClose }: RecruiterModalProps) {
                 </div>
               </div>
 
-              {/* Award highlight */}
-              <div className="p-4 card">
-                <p className="text-sm font-semibold t-primary mb-1">LKS Jawa Barat 2026</p>
-                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  Provincial delegate for Web Technologies — Dinas Pendidikan Jawa Barat
-                </p>
-              </div>
-
               {/* CTA */}
               <div className="flex gap-3">
                 <a
-                  href="/cv.pdf"
+                  href={cvUrl}
                   download="Rasya_Syahreza_CV.pdf"
+                  onClick={() => track("cv_download")}
                   className="btn btn-primary flex-1 text-center justify-center"
                 >
                   <Download size={15} />
                   Download CV (PDF)
                 </a>
                 <a
-                  href="https://wa.me/6283840559238"
+                  href={`https://wa.me/${waNumber}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track("contact_click")}
                   className="btn btn-secondary flex-1 text-center justify-center"
                 >
                   <Phone size={15} />

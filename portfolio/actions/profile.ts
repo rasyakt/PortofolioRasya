@@ -18,6 +18,7 @@ const ProfileSchema = z.object({
   linkedin: z.string().trim().url("Invalid LinkedIn URL"),
   portfolioUrl: z.string().trim().url("Invalid Portfolio URL"),
   cvUrl: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
   isAvailable: z.boolean().default(true),
   availabilityText: z.string().min(1, "Availability text is required").trim(),
 });
@@ -34,6 +35,7 @@ export async function updateProfile(data: z.infer<typeof ProfileSchema>) {
   const payload = {
     ...validated,
     cvUrl: validated.cvUrl || null,
+    photoUrl: validated.photoUrl || null,
   };
   let profile;
   if (existing) {

@@ -3,12 +3,17 @@
 import { useState } from "react";
 import Image from "next/image";
 
+const STATIC_SOURCES = ["/profile.jpg", "/profile.jpeg", "/profile.png", "/profile.webp"];
+
 /**
- * Hero portrait. Drop your photo at `public/profile.jpg` to use it —
- * otherwise a clean monogram fallback is shown.
+ * Hero portrait. Prefers the CMS-uploaded photo, then a static file
+ * at `public/profile.jpg` (`.jpeg` / `.png` / `.webp` also work) —
+ * otherwise a monogram fallback is shown.
  */
-export default function ProfilePhoto() {
-  const [failed, setFailed] = useState(false);
+export default function ProfilePhoto({ src }: { src?: string | null }) {
+  const [srcIndex, setSrcIndex] = useState(0);
+  const sources = src ? [src, ...STATIC_SOURCES] : STATIC_SOURCES;
+  const current = sources[srcIndex];
 
   return (
     <div
@@ -20,14 +25,15 @@ export default function ProfilePhoto() {
         aspectRatio: "4 / 5",
       }}
     >
-      {!failed ? (
+      {current !== undefined ? (
         <Image
-          src="/profile.jpg"
+          key={current}
+          src={current}
           alt="Rasya Syahreza Maulana Zen"
           fill
           sizes="280px"
           style={{ objectFit: "cover" }}
-          onError={() => setFailed(true)}
+          onError={() => setSrcIndex((i) => i + 1)}
         />
       ) : (
         <div

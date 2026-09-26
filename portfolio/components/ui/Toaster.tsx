@@ -53,7 +53,7 @@ export function Toaster() {
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm pointer-events-auto shadow-2xl"
             style={{
               background: "var(--bg-elevated)",
-              border: "1px solid var(--border-highlight)",
+              border: "1px solid var(--border-strong)",
               color: "var(--text-primary)",
               boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
               minWidth: "220px",
@@ -62,7 +62,7 @@ export function Toaster() {
             <CheckCircle2
               size={15}
               style={{
-                color: t.type === "success" ? "var(--accent)" : t.type === "error" ? "#f87171" : "#38bdf8",
+                color: t.type === "success" ? "var(--accent)" : t.type === "error" ? "#f87171" : "var(--info)",
                 flexShrink: 0,
               }}
             />

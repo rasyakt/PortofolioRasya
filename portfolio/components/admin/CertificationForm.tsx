@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createCertification, updateCertification } from "@/actions/certifications";
-import { Save, X } from "lucide-react";
+import { Save, X, Upload, Trash2 } from "lucide-react";
+import { toast } from "../ui/Toaster";
+import { useFormGuard } from "@/lib/form-guard";
 
 interface Certification {
   id?: string;
@@ -64,9 +67,35 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
   const [data, setData] = useState<Certification>(cert ?? EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  useFormGuard(dirty, () => formRef.current?.requestSubmit());
 
-  const set = (key: keyof Certification, val: string | number) =>
+  const handleBadgeSelect = async (file: File | undefined) => {
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("folder", "badges");
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.error ?? "Upload failed");
+      set("badgeImage", json.url);
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const set = (key: keyof Certification, val: string | number) => {
+    setDirty(true);
     setData((d) => ({ ...d, [key]: val }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,6 +118,8 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
       } else {
         await createCertification(payload);
       }
+      setDirty(false);
+      toast("Record saved");
       router.push("/admin/certifications");
       router.refresh();
     } catch (err: unknown) {
@@ -99,7 +130,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 max-w-2xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="p-8 max-w-2xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="section-label mb-1">CMS</p>
@@ -115,7 +146,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
           >
             <X size={14} /> Cancel
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving} title="Save (Ctrl+S)">
             <Save size={14} /> {saving ? "Saving..." : "Save Record"}
           </button>
         </div>
@@ -204,12 +235,54 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
           placeholder="https://example.com/certificate/..."
         />
 
-        <FormField
-          label="Badge Image URL (optional)"
-          value={data.badgeImage ?? ""}
-          onChange={(val) => set("badgeImage", val)}
-          placeholder="/badges/cert.png"
-        />
+        {/* Badge upload */}
+        <div>
+          <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Badge Image (upload — PNG/JPG/WebP/GIF, maks 5 MB)
+          </label>
+          {data.badgeImage ? (
+            <div className="flex items-start gap-4">
+              <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0" style={{ border: "1px solid var(--border)" }}>
+                <Image
+                  src={data.badgeImage}
+                  alt="Badge preview"
+                  fill
+                  sizes="80px"
+                  style={{ objectFit: "cover" }}
+                  unoptimized
+                />
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ fontSize: "12px", padding: "6px 12px" }}
+                onClick={() => set("badgeImage", "")}
+              >
+                <Trash2 size={13} /> Remove
+              </button>
+            </div>
+          ) : (
+            <label
+              className="flex items-center justify-center gap-2 p-6 rounded-xl cursor-pointer transition-colors"
+              style={{ border: "1px dashed var(--border-strong)", color: "var(--text-muted)" }}
+            >
+              <Upload size={15} />
+              <span className="text-xs font-medium">
+                {uploading ? "Uploading..." : "Pilih file badge..."}
+              </span>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => handleBadgeSelect(e.target.files?.[0])}
+              />
+            </label>
+          )}
+          {uploadError && (
+            <p className="text-xs mt-2" style={{ color: "#f87171" }}>{uploadError}</p>
+          )}
+        </div>
       </div>
     </form>
   );

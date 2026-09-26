@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, FolderOpen, Download, Mail, ExternalLink, User, LayoutGrid, Award, Terminal, Moon, Copy } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "./icons/BrandIcons";
 import Fuse from "fuse.js";
+import { track } from "@/lib/analytics";
+import { copyText } from "@/lib/clipboard";
+import { toast } from "./ui/Toaster";
+import { useFocusTrap } from "@/lib/focus-trap";
 
 interface CommandItem {
   id: string;
@@ -19,23 +23,34 @@ interface CommandItem {
 interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
+  contact: {
+    email: string;
+    phone: string;
+    github: string;
+    linkedin: string;
+  };
 }
 
-const CONTACT = {
+const FALLBACK_CONTACT = {
   email: "rasyasyahrezamaulanazen@gmail.com",
   phone: "+62 838 4055 9238",
   github: "https://github.com/rasyakt",
   linkedin: "https://linkedin.com/in/rasya-syahreza-maulana-zen",
 };
 
-export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
+export default function CommandPalette({ open, onClose, contact }: CommandPaletteProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [copied, setCopied] = useState<string | null>(null);
+  const CONTACT = contact ?? FALLBACK_CONTACT;
 
-  const copyToClipboard = useCallback((text: string, label: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = useCallback(async (text: string, label: string) => {
+    const ok = await copyText(text);
+    if (!ok) {
+      toast("Copy failed", "error");
+      return;
+    }
     setCopied(label);
     setTimeout(() => setCopied(null), 2000);
   }, []);
@@ -149,6 +164,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       category: "Actions",
       icon: <Download size={15} />,
       action: () => {
+        track("cv_download");
         const a = document.createElement("a");
         a.href = "/cv.pdf";
         a.download = "Rasya_Syahreza_CV.pdf";
@@ -168,7 +184,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       },
       keywords: ["admin", "cms", "dashboard"],
     },
-  ], [scrollTo, copyToClipboard, handleClose, router]);
+  ], [scrollTo, copyToClipboard, handleClose, router, CONTACT]);
 
   const fuse = useMemo(() => new Fuse(COMMANDS, {
     keys: ["label", "category", "keywords"],
@@ -194,6 +210,8 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   const flatResultsRef = useRef(flatResults);
   const activeIndexRef = useRef(activeIndex);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
     flatResultsRef.current = flatResults;
@@ -233,8 +251,12 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           onClick={handleClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command palette"
         >
           <motion.div
+            ref={dialogRef}
             className="cmd-palette mx-4"
             initial={{ opacity: 0, scale: 0.97, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

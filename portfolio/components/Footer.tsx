@@ -1,9 +1,29 @@
 "use client";
 
-export default function Footer() {
+import type { ProfileConfig } from "@prisma/client";
+import { track } from "@/lib/analytics";
+
+function digitsOnly(phone: string) {
+  return phone.replace(/\D/g, "");
+}
+
+export default function Footer({ profile }: { profile: ProfileConfig | null }) {
   const scrollTo = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const email = profile?.email || "rasyasyahrezamaulanazen@gmail.com";
+  const phone = profile?.phone || "+62 838 4055 9238";
+  const github = profile?.github || "https://github.com/rasyakt";
+  const linkedin = profile?.linkedin || "https://linkedin.com/in/rasya-syahreza-maulana-zen";
+  const owner = profile?.name || "Rasya Syahreza Maulana Zen";
+
+  const contacts = [
+    { label: "Email", href: `mailto:${email}` },
+    { label: "WhatsApp", href: `https://wa.me/${digitsOnly(phone)}` },
+    { label: "GitHub", href: github },
+    { label: "LinkedIn", href: linkedin },
+  ];
 
   return (
     <footer
@@ -18,9 +38,8 @@ export default function Footer() {
             <p className="text-sm font-semibold t-primary mb-3">
               rasya<span style={{ color: "var(--accent)" }}>.</span>dev
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              Fullstack developer & AI engineer.
-              Building systems that run in production.
+            <p className="text-[13px] leading-relaxed t-muted">
+              {profile?.headline || "Fullstack developer & AI engineer."}
             </p>
           </div>
 
@@ -48,18 +67,18 @@ export default function Footer() {
           <div>
             <p className="section-label mb-4">Contact</p>
             <div className="space-y-2.5 text-[13px]">
-              <a href="mailto:rasyasyahrezamaulanazen@gmail.com" className="link-hover block">
-                Email
-              </a>
-              <a href="https://wa.me/6283840559238" target="_blank" rel="noopener noreferrer" className="link-hover block">
-                WhatsApp
-              </a>
-              <a href="https://github.com/rasyakt" target="_blank" rel="noopener noreferrer" className="link-hover block">
-                GitHub
-              </a>
-              <a href="https://linkedin.com/in/rasya-syahreza-maulana-zen" target="_blank" rel="noopener noreferrer" className="link-hover block">
-                LinkedIn
-              </a>
+              {contacts.map((c) => (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track("contact_click")}
+                  className="link-hover block"
+                >
+                  {c.label}
+                </a>
+              ))}
             </div>
           </div>
         </div>
@@ -69,10 +88,10 @@ export default function Footer() {
           className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3"
           style={{ borderTop: "1px solid var(--border)" }}
         >
-          <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-            © {new Date().getFullYear()} Rasya Syahreza Maulana Zen
+          <p className="text-xs font-mono t-muted">
+            © {new Date().getFullYear()} {owner}
           </p>
-          <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs font-mono t-muted">
             Next.js · Tailwind · Prisma
           </p>
         </div>

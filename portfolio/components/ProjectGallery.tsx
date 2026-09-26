@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, ExternalLink, Shield, ChevronRight, Layers,
-  Zap, Target, Cpu, BarChart3,
+  X, ExternalLink, Shield, ChevronRight, ChevronLeft, Layers,
+  Zap, Target, Cpu, BarChart3, Search, Share2,
 } from "lucide-react";
 import { GithubIcon } from "./icons/BrandIcons";
 import ProjectCover from "./ProjectCover";
+import { track } from "@/lib/analytics";
+import { copyText } from "@/lib/clipboard";
+import { toast } from "./ui/Toaster";
+import { useFocusTrap } from "@/lib/focus-trap";
 
 export interface Project {
   id: string;
@@ -46,8 +50,47 @@ function safeParseJsonArray(str?: string | null): string[] {
   }
 }
 
-function CaseStudyModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function CaseStudyModal({
+  project,
+  onClose,
+  onPrev,
+  onNext,
+  hasNav,
+}: {
+  project: Project;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+  hasNav: boolean;
+}) {
   const tech: string[] = safeParseJsonArray(project.techStack);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft" && hasNav) onPrev();
+      else if (e.key === "ArrowRight" && hasNav) onNext();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose, onPrev, onNext, hasNav]);
+
+  const share = async () => {
+    const url = project.liveUrl || window.location.href;
+    const data = { title: project.title, text: project.description, url };
+    try {
+      if (navigator.share) {
+        await navigator.share(data);
+        return;
+      }
+      throw new Error("no share api");
+    } catch {
+      const ok = await copyText(url);
+      toast(ok ? "Link copied to clipboard" : "Could not copy link", ok ? "success" : "error");
+    }
+  };
 
   return (
     <motion.div
@@ -57,8 +100,12 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={project.title}
     >
       <motion.div
+        ref={dialogRef}
         className="w-full max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide"
         style={{
           background: "var(--bg-surface)",
@@ -100,12 +147,23 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
               {project.title}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg link-hover cursor-pointer bg-transparent border-none"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={share}
+              className="p-2 rounded-lg link-hover cursor-pointer bg-transparent border-none"
+              title="Share project"
+              aria-label="Share project"
+            >
+              <Share2 size={16} />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg link-hover cursor-pointer bg-transparent border-none"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="p-6 space-y-5">
@@ -173,6 +231,27 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
               </p>
             )}
           </div>
+
+          {/* Prev / next */}
+          {hasNav && (
+            <div
+              className="flex items-center justify-between"
+              style={{ borderTop: "1px solid var(--border)", paddingTop: "16px" }}
+            >
+              <button
+                onClick={onPrev}
+                className="inline-flex items-center gap-1.5 text-xs font-mono link-hover cursor-pointer bg-transparent border-none p-0"
+              >
+                <ChevronLeft size={13} /> Prev
+              </button>
+              <button
+                onClick={onNext}
+                className="inline-flex items-center gap-1.5 text-xs font-mono link-hover cursor-pointer bg-transparent border-none p-0"
+              >
+                Next <ChevronRight size={13} />
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
@@ -199,6 +278,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
           title={project.title}
           category={project.category}
           coverImage={project.coverImage}
+          className="transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </div>
 
@@ -289,9 +369,25 @@ const TABS = [
 
 export default function ProjectGallery({ projects }: { projects: Project[] }) {
   const [activeTab, setActiveTab] = useState("all");
-  const [selected, setSelected] = useState<Project | null>(null);
+  const [query, setQuery] = useState("");
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
-  const filtered = activeTab === "all" ? projects : projects.filter((p) => p.category === activeTab);
+  const filtered = useMemo(() => {
+    const byTab = activeTab === "all" ? projects : projects.filter((p) => p.category === activeTab);
+    const q = query.trim().toLowerCase();
+    if (!q) return byTab;
+    return byTab.filter((p) =>
+      [p.title, p.description, p.techStack, CATEGORY_LABELS[p.category] ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [projects, activeTab, query]);
+
+  const openProject = (p: Project) => {
+    track("project_open");
+    setSelectedIdx(filtered.findIndex((x) => x.id === p.id));
+  };
 
   return (
     <section id="projects" className="py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
@@ -304,9 +400,10 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
         </p>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex items-center gap-1 mb-8 max-w-full overflow-x-auto scrollbar-hide">
-        {TABS.map((tab) => {
+      {/* Filter tabs + search */}
+      <div className="flex flex-wrap items-center gap-3 mb-8">
+        <div className="flex items-center gap-1 max-w-full overflow-x-auto scrollbar-hide">
+          {TABS.map((tab) => {
           const count = tab.id === "all" ? projects.length : projects.filter((p) => p.category === tab.id).length;
           const isActive = activeTab === tab.id;
           return (
@@ -324,26 +421,46 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
             </button>
           );
         })}
+        </div>
+        <div className="relative ml-auto">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 t-muted pointer-events-none" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search projects..."
+            aria-label="Search projects"
+            className="input-base"
+            style={{ paddingLeft: "32px", width: "200px", fontSize: "12px", paddingTop: "7px", paddingBottom: "7px" }}
+          />
+        </div>
       </div>
 
       {/* Grid */}
       <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence>
           {filtered.map((p) => (
-            <ProjectCard key={p.id} project={p} onClick={() => setSelected(p)} />
+            <ProjectCard key={p.id} project={p} onClick={() => openProject(p)} />
           ))}
         </AnimatePresence>
       </motion.div>
 
       {filtered.length === 0 && (
         <p className="text-center py-16 font-mono text-sm t-muted">
-          No projects in this category yet.
+          {query ? `No projects match "${query}".` : "No projects in this category yet."}
         </p>
       )}
 
       {/* Case study modal */}
       <AnimatePresence>
-        {selected && <CaseStudyModal project={selected} onClose={() => setSelected(null)} />}
+        {selectedIdx !== null && filtered[selectedIdx] && (
+          <CaseStudyModal
+            project={filtered[selectedIdx]}
+            onClose={() => setSelectedIdx(null)}
+            onPrev={() => setSelectedIdx((i) => (i === null ? i : (i - 1 + filtered.length) % filtered.length))}
+            onNext={() => setSelectedIdx((i) => (i === null ? i : (i + 1) % filtered.length))}
+            hasNav={filtered.length > 1}
+          />
+        )}
       </AnimatePresence>
     </section>
   );
