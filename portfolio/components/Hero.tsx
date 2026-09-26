@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { Download, ArrowRight, Copy, Check } from "lucide-react";
 import type { ProfileConfig, Certification } from "@prisma/client";
 import RecruiterModal from "./RecruiterModal";
-import ProfilePhoto from "./ProfilePhoto";
+import ProfileIDCard from "./ProfileIDCard";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./ui/Toaster";
@@ -247,7 +247,13 @@ export default function Hero({
           >
             <div aria-hidden="true" className="absolute -inset-3 rounded-[28px] portrait-halo animate-spin-slow" />
             <div className="relative">
-              <ProfilePhoto src={profile?.photoUrl} />
+              <ProfileIDCard
+                name={name}
+                headline={roles.join(" · ")}
+                location={location}
+                email={email}
+                photoUrl={profile?.photoUrl}
+              />
             </div>
             <p className="text-center text-xs font-mono t-muted mt-3">
               rasya@workspace:~
