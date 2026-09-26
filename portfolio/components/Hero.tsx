@@ -141,20 +141,22 @@ export default function Hero({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
           >
-            {/* Status */}
-            <div className="flex flex-wrap items-center gap-3 mb-7">
+            {/* Status — plain editorial line, no pill */}
+            <p className="mb-7 text-[13px] font-mono leading-relaxed">
               {available ? (
-                <span className="status-available">
-                  <span className="status-dot" />
-                  {availabilityText}
-                </span>
+                <>
+                  <span
+                    aria-hidden="true"
+                    className="status-dot animate-pulse inline-block mr-2"
+                    style={{ verticalAlign: "1px" }}
+                  />
+                  <span className="t-secondary">{availabilityText}</span>
+                </>
               ) : (
-                <span className="badge">{availabilityText}</span>
+                <span className="t-muted">{availabilityText}</span>
               )}
-              <span className="text-xs font-mono t-muted">
-                {location}
-              </span>
-            </div>
+              <span className="t-muted"> · {location}</span>
+            </p>
 
             {/* Name + role */}
             <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight t-primary leading-[1.1] mb-4">
