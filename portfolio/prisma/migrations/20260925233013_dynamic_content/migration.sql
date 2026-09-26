@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `profileconfig` ADD COLUMN `photoUrl` TEXT NULL;
+ALTER TABLE `ProfileConfig` ADD COLUMN `photoUrl` TEXT NULL;
 
 -- CreateTable
 CREATE TABLE `Experience` (
