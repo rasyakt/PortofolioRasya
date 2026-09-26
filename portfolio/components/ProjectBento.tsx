@@ -45,7 +45,7 @@ export default function ProjectBento({
           <div className="space-y-6">
             {areas.map((item, i) => (
               <motion.div
-                key={item.title}
+                key={`${item.title}-${i}`}
                 initial={{ opacity: 0, x: -10 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.35, delay: 0.15 + i * 0.1 }}
@@ -80,9 +80,9 @@ export default function ProjectBento({
               animate={inView ? "show" : "hidden"}
               variants={{ show: { transition: { staggerChildren: 0.03, delayChildren: 0.3 } } }}
             >
-              {tech.map((t) => (
+              {tech.map((t, i) => (
                 <motion.span
-                  key={t}
+                  key={`${t}-${i}`}
                   className="badge"
                   variants={{
                     hidden: { opacity: 0, scale: 0.85 },

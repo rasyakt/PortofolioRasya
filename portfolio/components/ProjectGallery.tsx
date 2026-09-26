@@ -208,8 +208,8 @@ function CaseStudyModal({
               </p>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {tech.map((t) => (
-                <span key={t} className="badge">{t}</span>
+              {tech.map((t, i) => (
+                <span key={`${t}-${i}`} className="badge">{t}</span>
               ))}
             </div>
           </div>
@@ -320,8 +320,8 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
         <div className="mt-auto">
           {/* Tech Chips */}
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {tech.map((t) => (
-              <span key={t} className="badge">{t}</span>
+            {tech.map((t, i) => (
+              <span key={`${t}-${i}`} className="badge">{t}</span>
             ))}
             {allTech.length > 4 && (
               <span className="badge">+{allTech.length - 4}</span>
@@ -464,6 +464,7 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
       <AnimatePresence>
         {selectedIdx !== null && filtered[selectedIdx] && (
           <CaseStudyModal
+            key={filtered[selectedIdx].id}
             project={filtered[selectedIdx]}
             onClose={() => setSelectedIdx(null)}
             onPrev={() => setSelectedIdx((i) => (i === null ? i : (i - 1 + filtered.length) % filtered.length))}

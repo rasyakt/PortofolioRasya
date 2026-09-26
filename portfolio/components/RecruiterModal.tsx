@@ -79,6 +79,7 @@ export default function RecruiterModal({
     <AnimatePresence>
       {open && (
         <motion.div
+          key="recruiter-dialog"
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "var(--overlay)", backdropFilter: "blur(8px)" }}
           initial={{ opacity: 0 }}
@@ -219,8 +220,8 @@ export default function RecruiterModal({
                 <div>
                   <p className="text-sm font-semibold t-primary mb-3">Technical stack</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {tech.map((t) => (
-                      <span key={t} className="badge">{t}</span>
+                    {tech.map((t, i) => (
+                      <span key={`${t}-${i}`} className="badge">{t}</span>
                     ))}
                   </div>
                 </div>
@@ -284,6 +285,7 @@ export default function RecruiterModal({
         </motion.div>
       )}
       <CVPreviewModal
+        key="cv-preview"
         open={cvPreviewOpen}
         onClose={() => setCvPreviewOpen(false)}
         cvUrl={cvUrl}
