@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logServerError } from "@/lib/error-log";
 
 const ALLOWED_TYPES = new Set([
   "page_view",
@@ -27,7 +28,8 @@ export async function POST(req: Request) {
       data: { type, path: rawPath.slice(0, 200) },
     });
     return new NextResponse(null, { status: 204 });
-  } catch {
+  } catch (err: unknown) {
+    await logServerError(err instanceof Error ? err.message : "events API failed", "/api/events");
     return NextResponse.json({ error: "Failed to record event" }, { status: 500 });
   }
 }

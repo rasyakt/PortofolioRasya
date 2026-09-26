@@ -106,3 +106,13 @@ model Skill {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  message   String   @db.Text
+  path      String   @db.Text
+  source    String   @default("client") // "client" | "server"
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

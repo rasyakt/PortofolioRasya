@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { logoutAdmin } from "@/actions/profile";
 import {
   LayoutDashboard, FolderOpen, Award, User, LogOut, Terminal, ExternalLink,
-  Briefcase, Layers,
+  Briefcase, Layers, Activity,
 } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
@@ -15,6 +15,7 @@ const NAV = [
   { icon: <Award size={16} />, label: "Certifications", href: "/admin/certifications" },
   { icon: <Briefcase size={16} />, label: "Experience", href: "/admin/experience" },
   { icon: <Layers size={16} />, label: "Skills", href: "/admin/skills" },
+  { icon: <Activity size={16} />, label: "Analytics", href: "/admin/analytics" },
   { icon: <User size={16} />, label: "Profile", href: "/admin/profile" },
 ];
 

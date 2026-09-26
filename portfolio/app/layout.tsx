@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/Toaster";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import ErrorTracker from "@/components/ErrorTracker";
 import { getProfile } from "@/actions/profile";
 
 const inter = Inter({
@@ -112,6 +113,7 @@ export default async function RootLayout({
           {children}
           <Toaster />
           <AnalyticsTracker />
+          <ErrorTracker />
         </CommandPaletteProvider>
       </body>
     </html>

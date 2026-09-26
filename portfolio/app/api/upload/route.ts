@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join, extname } from "node:path";
 import { randomUUID } from "node:crypto";
 import { requireAuth } from "@/lib/auth";
+import { logServerError } from "@/lib/error-log";
 
 const ALLOWED_MIME: Record<string, string> = {
   "image/png": ".png",
@@ -92,7 +93,8 @@ export async function POST(req: Request) {
     await writeFile(join(dir, filename), bytes);
 
     return NextResponse.json({ url: `/${folder}/${filename}` });
-  } catch {
+  } catch (err: unknown) {
+    await logServerError(err instanceof Error ? err.message : "upload API failed", "/api/upload");
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }
