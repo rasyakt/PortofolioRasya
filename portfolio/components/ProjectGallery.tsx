@@ -289,7 +289,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
       <div className="p-5 flex flex-col flex-1">
         {/* Top Badges */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
             <span className="badge">
               {CATEGORY_LABELS[project.category]}
             </span>
@@ -407,13 +407,13 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
         <p className="section-label mb-2">Projects</p>
         <h2 className="section-title">Selected work</h2>
         <p className="section-desc">
-          {projects.length} production applications — select a card for the full case study.
+          {projects.length} production application{projects.length === 1 ? "" : "s"} — select a card for the full case study.
         </p>
       </motion.div>
 
       {/* Filter tabs + search */}
       <div className="flex flex-wrap items-center gap-3 mb-8">
-        <div className="flex items-center gap-1 max-w-full overflow-x-auto scrollbar-hide">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
           {TABS.map((tab) => {
           const count = tab.id === "all" ? projects.length : projects.filter((p) => p.category === tab.id).length;
           const isActive = activeTab === tab.id;
@@ -428,20 +428,20 @@ export default function ProjectGallery({ projects }: { projects: Project[] }) {
                   : { color: "var(--text-muted)", border: "1px solid transparent" }
               }
             >
-              {tab.label} <span className="font-mono opacity-70">{count > 0 ? count : ""}</span>
+              {tab.label} <span className="font-mono opacity-70 hidden sm:inline">{count > 0 ? count : ""}</span>
             </button>
           );
         })}
         </div>
-        <div className="relative ml-auto">
+        <div className="relative w-full sm:w-auto sm:ml-auto">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 t-muted pointer-events-none" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search projects..."
             aria-label="Search projects"
-            className="input-base"
-            style={{ paddingLeft: "32px", width: "200px", fontSize: "12px", paddingTop: "7px", paddingBottom: "7px" }}
+            className="input-base w-full sm:w-[200px]"
+            style={{ paddingLeft: "32px", fontSize: "12px", paddingTop: "7px", paddingBottom: "7px" }}
           />
         </div>
       </div>
