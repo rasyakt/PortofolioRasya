@@ -1,5 +1,7 @@
+import { getSkillGroups } from "@/actions/skills";
 import SkillForm from "@/components/admin/SkillForm";
 
-export default function NewSkillPage() {
-  return <SkillForm />;
+export default async function NewSkillPage() {
+  const groups = await getSkillGroups();
+  return <SkillForm groups={groups} />;
 }

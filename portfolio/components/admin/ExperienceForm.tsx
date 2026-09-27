@@ -132,30 +132,17 @@ export default function ExperienceForm({ item }: { item?: Experience }) {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Company / Organization *
-            </label>
-            <input
-              className="input-base"
-              required
-              value={data.company}
-              onChange={(e) => set("company", e.target.value)}
-              placeholder="BotHax"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Order
-            </label>
-            <input
-              type="number"
-              className="input-base"
-              value={data.order}
-              onChange={(e) => set("order", parseInt(e.target.value) || 0)}
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Company / Organization *
+          </label>
+          <input
+            className="input-base"
+            required
+            value={data.company}
+            onChange={(e) => set("company", e.target.value)}
+            placeholder="BotHax"
+          />
         </div>
 
         <div>

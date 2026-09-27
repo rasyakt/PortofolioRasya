@@ -225,8 +225,8 @@ export default function ProjectForm({ project }: { project?: Project }) {
           </div>
         </div>
 
-        {/* Category + Order */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        {/* Category + Featured */}
+        <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
               Category *
@@ -242,17 +242,6 @@ export default function ProjectForm({ project }: { project?: Project }) {
               <option value="ai">AI / Agents</option>
               <option value="systems">Systems</option>
             </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Order
-            </label>
-            <input
-              type="number"
-              className="input-base"
-              value={data.order}
-              onChange={(e) => set("order", parseInt(e.target.value) || 0)}
-            />
           </div>
           <div className="flex items-end pb-1">
             <label className="flex items-center gap-2 cursor-pointer">

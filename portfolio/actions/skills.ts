@@ -9,17 +9,35 @@ const SkillSchema = z.object({
   kind: z.enum(["area", "tech"]),
   title: z.string().min(1, "Title is required").trim(),
   desc: z.string().nullable().optional(),
+  group: z.string().trim().max(40).nullable().optional(),
   order: z.number().default(0),
 });
+
+function normalizeGroup(group: string | null | undefined): string | null {
+  const g = (group ?? "").trim();
+  return g.length > 0 ? g.slice(0, 40) : null;
+}
 
 export async function getSkills() {
   return prisma.skill.findMany({ orderBy: { order: "asc" } });
 }
 
+export async function getSkillGroups(): Promise<string[]> {
+  const rows = await prisma.skill.findMany({
+    where: { group: { not: null } },
+    select: { group: true },
+    distinct: ["group"],
+  });
+  return rows.map((r) => r.group as string).filter(Boolean).sort();
+}
+
 export async function createSkill(data: z.infer<typeof SkillSchema>) {
   await requireAuth();
   const validated = SkillSchema.parse(data);
-  const item = await prisma.skill.create({ data: validated });
+  const max = await prisma.skill.aggregate({ _max: { order: true } });
+  const item = await prisma.skill.create({
+    data: { ...validated, group: normalizeGroup(validated.group), order: (max._max.order ?? -1) + 1 },
+  });
   revalidatePath("/");
   revalidatePath("/admin/skills");
   return { success: true, item };
@@ -28,7 +46,12 @@ export async function createSkill(data: z.infer<typeof SkillSchema>) {
 export async function updateSkill(id: string, data: z.infer<typeof SkillSchema>) {
   await requireAuth();
   const validated = SkillSchema.parse(data);
-  const item = await prisma.skill.update({ where: { id }, data: validated });
+  const { order: _ignoredOrder, ...rest } = validated;
+  void _ignoredOrder;
+  const item = await prisma.skill.update({
+    where: { id },
+    data: { ...rest, group: normalizeGroup(validated.group) },
+  });
   revalidatePath("/");
   revalidatePath("/admin/skills");
   return { success: true, item };
@@ -50,29 +73,25 @@ export async function duplicateSkill(id: string) {
   void _omitId;
   void _omitCreated;
   void _omitUpdated;
+  const max = await prisma.skill.aggregate({ _max: { order: true } });
   const copy = await prisma.skill.create({
-    data: { ...rest, title: `${src.title} (Copy)` },
+    data: { ...rest, title: `${src.title} (Copy)`, order: (max._max.order ?? -1) + 1 },
   });
   revalidatePath("/");
   revalidatePath("/admin/skills");
   return { success: true, item: copy };
 }
 
-export async function moveSkill(id: string, kind: "area" | "tech", direction: "up" | "down") {
+/**
+ * Persist a drag-and-drop order within one section. `ids` must be the FULL
+ * ordered id list of that section (dragging is disabled while searching).
+ */
+export async function reorderSkills(ids: string[]) {
   await requireAuth();
-  const list = await prisma.skill.findMany({
-    where: { kind },
-    orderBy: { order: "asc" },
-  });
-  const idx = list.findIndex((s) => s.id === id);
-  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
-  const a = list[idx];
-  const b = list[swapIdx];
-  await prisma.$transaction([
-    prisma.skill.update({ where: { id: a.id }, data: { order: b.order } }),
-    prisma.skill.update({ where: { id: b.id }, data: { order: a.order } }),
-  ]);
+  const clean = ids.filter((id) => typeof id === "string").slice(0, 500);
+  await prisma.$transaction(
+    clean.map((id, index) => prisma.skill.update({ where: { id }, data: { order: index } }))
+  );
   revalidatePath("/");
   revalidatePath("/admin/skills");
   return { success: true };

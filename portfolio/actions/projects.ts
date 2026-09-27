@@ -57,7 +57,10 @@ export async function createProject(data: z.infer<typeof ProjectSchema>) {
   await requireAuth();
   const validated = ProjectSchema.parse(data);
   try {
-    const project = await prisma.project.create({ data: validated });
+    const max = await prisma.project.aggregate({ _max: { order: true } });
+    const project = await prisma.project.create({
+      data: { ...validated, order: (max._max.order ?? -1) + 1 },
+    });
     revalidatePath("/");
     revalidatePath("/admin/projects");
     return { success: true, project };
@@ -70,7 +73,9 @@ export async function updateProject(id: string, data: z.infer<typeof ProjectSche
   await requireAuth();
   const validated = ProjectSchema.parse(data);
   try {
-    const project = await prisma.project.update({ where: { id }, data: validated });
+    const { order: _ignoredOrder, ...rest } = validated;
+    void _ignoredOrder;
+    const project = await prisma.project.update({ where: { id }, data: rest });
     revalidatePath("/");
     revalidatePath("/admin/projects");
     return { success: true, project };
@@ -109,28 +114,25 @@ export async function duplicateProject(id: string) {
   void _omitId;
   void _omitCreated;
   void _omitUpdated;
+  const max = await prisma.project.aggregate({ _max: { order: true } });
   const copy = await prisma.project.create({
-    data: { ...rest, title: `${src.title} (Copy)`, slug, featured: false },
+    data: { ...rest, title: `${src.title} (Copy)`, slug, featured: false, order: (max._max.order ?? -1) + 1 },
   });
   revalidatePath("/");
   revalidatePath("/admin/projects");
   return { success: true, project: copy };
 }
 
-export async function moveProject(id: string, direction: "up" | "down") {
+/**
+ * Persist a drag-and-drop order. `ids` must be the FULL ordered list
+ * (dragging is disabled while searching) — positions are written 0..n.
+ */
+export async function reorderProjects(ids: string[]) {
   await requireAuth();
-  const list = await prisma.project.findMany({
-    orderBy: [{ featured: "desc" }, { order: "asc" }],
-  });
-  const idx = list.findIndex((p) => p.id === id);
-  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
-  const a = list[idx];
-  const b = list[swapIdx];
-  await prisma.$transaction([
-    prisma.project.update({ where: { id: a.id }, data: { order: b.order } }),
-    prisma.project.update({ where: { id: b.id }, data: { order: a.order } }),
-  ]);
+  const clean = ids.filter((id) => typeof id === "string").slice(0, 500);
+  await prisma.$transaction(
+    clean.map((id, index) => prisma.project.update({ where: { id }, data: { order: index } }))
+  );
   revalidatePath("/");
   revalidatePath("/admin/projects");
   return { success: true };

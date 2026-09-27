@@ -39,7 +39,9 @@ export default async function HomePage() {
   const areas = skills
     .filter((s) => s.kind === "area")
     .map((s) => ({ title: s.title, desc: s.desc ?? "" }));
-  const tech = skills.filter((s) => s.kind !== "area").map((s) => s.title);
+  const tech = skills
+    .filter((s) => s.kind !== "area")
+    .map((s) => ({ title: s.title, group: s.group ?? null }));
   const hkiCerts = certs.filter((c) => c.type === "hki");
   const timeline = experiences.map((e) => ({
     year: e.year,

@@ -20,7 +20,10 @@ export async function getExperiences() {
 export async function createExperience(data: z.infer<typeof ExperienceSchema>) {
   await requireAuth();
   const validated = ExperienceSchema.parse(data);
-  const item = await prisma.experience.create({ data: validated });
+  const max = await prisma.experience.aggregate({ _max: { order: true } });
+  const item = await prisma.experience.create({
+    data: { ...validated, order: (max._max.order ?? -1) + 1 },
+  });
   revalidatePath("/");
   revalidatePath("/admin/experience");
   return { success: true, item };
@@ -29,7 +32,9 @@ export async function createExperience(data: z.infer<typeof ExperienceSchema>) {
 export async function updateExperience(id: string, data: z.infer<typeof ExperienceSchema>) {
   await requireAuth();
   const validated = ExperienceSchema.parse(data);
-  const item = await prisma.experience.update({ where: { id }, data: validated });
+  const { order: _ignoredOrder, ...rest } = validated;
+  void _ignoredOrder;
+  const item = await prisma.experience.update({ where: { id }, data: rest });
   revalidatePath("/");
   revalidatePath("/admin/experience");
   return { success: true, item };
@@ -51,26 +56,25 @@ export async function duplicateExperience(id: string) {
   void _omitId;
   void _omitCreated;
   void _omitUpdated;
+  const max = await prisma.experience.aggregate({ _max: { order: true } });
   const copy = await prisma.experience.create({
-    data: { ...rest, role: `${src.role} (Copy)` },
+    data: { ...rest, role: `${src.role} (Copy)`, order: (max._max.order ?? -1) + 1 },
   });
   revalidatePath("/");
   revalidatePath("/admin/experience");
   return { success: true, item: copy };
 }
 
-export async function moveExperience(id: string, direction: "up" | "down") {
+/**
+ * Persist a drag-and-drop order. `ids` must be the FULL ordered list
+ * (dragging is disabled while searching) — positions are written 0..n.
+ */
+export async function reorderExperiences(ids: string[]) {
   await requireAuth();
-  const list = await prisma.experience.findMany({ orderBy: { order: "asc" } });
-  const idx = list.findIndex((e) => e.id === id);
-  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
-  const a = list[idx];
-  const b = list[swapIdx];
-  await prisma.$transaction([
-    prisma.experience.update({ where: { id: a.id }, data: { order: b.order } }),
-    prisma.experience.update({ where: { id: b.id }, data: { order: a.order } }),
-  ]);
+  const clean = ids.filter((id) => typeof id === "string").slice(0, 500);
+  await prisma.$transaction(
+    clean.map((id, index) => prisma.experience.update({ where: { id }, data: { order: index } }))
+  );
   revalidatePath("/");
   revalidatePath("/admin/experience");
   return { success: true };

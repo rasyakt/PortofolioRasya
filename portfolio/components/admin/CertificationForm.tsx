@@ -239,7 +239,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
           required
         />
 
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
               Record Type *
@@ -262,18 +262,6 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
               onChange={(val) => set("issueDate", val)}
               placeholder="Agustus 2026 / 2025"
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Display Order
-            </label>
-            <input
-              type="number"
-              className="input-base"
-              value={data.order}
-              onChange={(e) => set("order", parseInt(e.target.value) || 0)}
             />
           </div>
         </div>

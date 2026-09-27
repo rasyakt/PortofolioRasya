@@ -32,7 +32,10 @@ export async function getCertificationById(id: string) {
 export async function createCertification(data: z.infer<typeof CertSchema>) {
   await requireAuth();
   const validated = CertSchema.parse(data);
-  const cert = await prisma.certification.create({ data: validated });
+  const max = await prisma.certification.aggregate({ _max: { order: true } });
+  const cert = await prisma.certification.create({
+    data: { ...validated, order: (max._max.order ?? -1) + 1 },
+  });
   revalidatePath("/");
   revalidatePath("/admin/certifications");
   return { success: true, cert };
@@ -41,7 +44,9 @@ export async function createCertification(data: z.infer<typeof CertSchema>) {
 export async function updateCertification(id: string, data: z.infer<typeof CertSchema>) {
   await requireAuth();
   const validated = CertSchema.parse(data);
-  const cert = await prisma.certification.update({ where: { id }, data: validated });
+  const { order: _ignoredOrder, ...rest } = validated;
+  void _ignoredOrder;
+  const cert = await prisma.certification.update({ where: { id }, data: rest });
   revalidatePath("/");
   revalidatePath("/admin/certifications");
   return { success: true, cert };
@@ -62,26 +67,25 @@ export async function duplicateCertification(id: string) {
   const { id: _omitId, createdAt: _omitCreated, ...rest } = src;
   void _omitId;
   void _omitCreated;
+  const max = await prisma.certification.aggregate({ _max: { order: true } });
   const copy = await prisma.certification.create({
-    data: { ...rest, title: `${src.title} (Copy)` },
+    data: { ...rest, title: `${src.title} (Copy)`, order: (max._max.order ?? -1) + 1 },
   });
   revalidatePath("/");
   revalidatePath("/admin/certifications");
   return { success: true, cert: copy };
 }
 
-export async function moveCertification(id: string, direction: "up" | "down") {
+/**
+ * Persist a drag-and-drop order. `ids` must be the FULL ordered list
+ * (dragging is disabled while searching) — positions are written 0..n.
+ */
+export async function reorderCertifications(ids: string[]) {
   await requireAuth();
-  const list = await prisma.certification.findMany({ orderBy: { order: "asc" } });
-  const idx = list.findIndex((c) => c.id === id);
-  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
-  const a = list[idx];
-  const b = list[swapIdx];
-  await prisma.$transaction([
-    prisma.certification.update({ where: { id: a.id }, data: { order: b.order } }),
-    prisma.certification.update({ where: { id: b.id }, data: { order: a.order } }),
-  ]);
+  const clean = ids.filter((id) => typeof id === "string").slice(0, 500);
+  await prisma.$transaction(
+    clean.map((id, index) => prisma.certification.update({ where: { id }, data: { order: index } }))
+  );
   revalidatePath("/");
   revalidatePath("/admin/certifications");
   return { success: true };

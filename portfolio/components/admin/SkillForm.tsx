@@ -12,12 +12,13 @@ interface Skill {
   kind: string;
   title: string;
   desc?: string | null;
+  group?: string | null;
   order: number;
 }
 
-const EMPTY: Skill = { kind: "tech", title: "", desc: "", order: 0 };
+const EMPTY: Skill = { kind: "tech", title: "", desc: "", group: "", order: 0 };
 
-export default function SkillForm({ item }: { item?: Skill }) {
+export default function SkillForm({ item, groups }: { item?: Skill; groups?: string[] }) {
   const router = useRouter();
   const [data, setData] = useState<Skill>(item ?? EMPTY);
   const [saving, setSaving] = useState(false);
@@ -40,6 +41,7 @@ export default function SkillForm({ item }: { item?: Skill }) {
         kind: (data.kind === "area" ? "area" : "tech") as "area" | "tech",
         title: data.title,
         desc: data.desc || undefined,
+        group: data.group || undefined,
         order: Number(data.order) || 0,
       };
       if (data.id) {
@@ -101,16 +103,23 @@ export default function SkillForm({ item }: { item?: Skill }) {
               <option value="area">Expertise area</option>
             </select>
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Order
+              Group (optional — e.g. Frontend, Backend, Mobile)
             </label>
             <input
-              type="number"
               className="input-base"
-              value={data.order}
-              onChange={(e) => set("order", parseInt(e.target.value) || 0)}
+              value={data.group ?? ""}
+              onChange={(e) => set("group", e.target.value)}
+              placeholder="Frontend"
+              list="skill-group-suggestions"
+              maxLength={40}
             />
+            <datalist id="skill-group-suggestions">
+              {(groups ?? []).map((g) => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
           </div>
         </div>
 

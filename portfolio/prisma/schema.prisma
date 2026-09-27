@@ -114,6 +114,7 @@ model Skill {
   kind      String   @default("tech") // "area" | "tech"
   title     String
   desc      String?  @db.Text
+  group     String?  // e.g. "Frontend", "Backend", "Mobile", "Database", "Tools"
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

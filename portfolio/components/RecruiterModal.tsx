@@ -28,7 +28,7 @@ interface RecruiterModalProps {
   onClose: () => void;
   profile: ProfileConfig | null;
   hkiCerts: Certification[];
-  tech: string[];
+  tech: { title: string; group: string | null }[];
   projectCount: number;
 }
 
@@ -219,11 +219,50 @@ export default function RecruiterModal({
               {tech.length > 0 && (
                 <div>
                   <p className="text-sm font-semibold t-primary mb-3">Technical stack</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tech.map((t, i) => (
-                      <span key={`${t}-${i}`} className="badge">{t}</span>
-                    ))}
-                  </div>
+                  {(() => {
+                    const groups = new Map<string, { title: string }[]>();
+                    const ungrouped: { title: string }[] = [];
+                    for (const t of tech) {
+                      if (t.group) {
+                        const arr = groups.get(t.group) ?? [];
+                        arr.push(t);
+                        groups.set(t.group, arr);
+                      } else {
+                        ungrouped.push(t);
+                      }
+                    }
+                    return (
+                      <div className="space-y-3">
+                        {[...groups.entries()].map(([group, items]) => (
+                          <div key={group} className="flex gap-3 items-start">
+                            <span className="text-xs t-muted w-20 shrink-0 pt-0.5 font-mono">{group}</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {items.map((item, i) => (
+                                <span key={`${item.title}-${i}`} className="badge">{item.title}</span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                        {ungrouped.length > 0 && groups.size > 0 && (
+                          <div className="flex gap-3 items-start">
+                            <span className="text-xs t-muted w-20 shrink-0 pt-0.5 font-mono">Other</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {ungrouped.map((item, i) => (
+                                <span key={`${item.title}-${i}`} className="badge">{item.title}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {groups.size === 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {ungrouped.map((item, i) => (
+                              <span key={`${item.title}-${i}`} className="badge">{item.title}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

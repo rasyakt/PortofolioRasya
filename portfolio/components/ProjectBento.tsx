@@ -8,17 +8,35 @@ export interface ExpertiseArea {
   desc: string;
 }
 
+export interface TechItem {
+  title: string;
+  group: string | null;
+}
+
 export default function ProjectBento({
   areas,
   tech,
 }: {
   areas: ExpertiseArea[];
-  tech: string[];
+  tech: TechItem[];
 }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   if (areas.length === 0 && tech.length === 0) return null;
+
+  const namedGroups = (() => {
+    const map = new Map<string, TechItem[]>();
+    for (const t of tech) {
+      if (!t.group) continue;
+      const arr = map.get(t.group) ?? [];
+      arr.push(t);
+      map.set(t.group, arr);
+    }
+    return [...map.entries()];
+  })();
+  const ungrouped = tech.filter((t) => !t.group);
+  const showGroupLabels = namedGroups.length > 0;
 
   return (
     <section id="bento" ref={ref} className="py-14 sm:py-20 max-w-5xl mx-auto px-6 scroll-mt-20">
@@ -74,25 +92,70 @@ export default function ProjectBento({
             <p className="text-[13px] t-muted mb-5">
               Tools I reach for first.
             </p>
-            <motion.div
-              className="flex flex-wrap gap-2"
-              initial="hidden"
-              animate={inView ? "show" : "hidden"}
-              variants={{ show: { transition: { staggerChildren: 0.03, delayChildren: 0.3 } } }}
-            >
-              {tech.map((t, i) => (
-                <motion.span
-                  key={`${t}-${i}`}
-                  className="badge"
-                  variants={{
-                    hidden: { opacity: 0, scale: 0.85 },
-                    show: { opacity: 1, scale: 1 },
-                  }}
-                >
-                  {t}
-                </motion.span>
-              ))}
-            </motion.div>
+            {showGroupLabels ? (
+              <div className="space-y-4">
+                {namedGroups.map(([group, items]) => (
+                  <div key={group}>
+                    <p className="text-[11px] font-mono t-muted mb-2 uppercase tracking-widest">
+                      {group}
+                    </p>
+                    <motion.div
+                      className="flex flex-wrap gap-2"
+                      initial="hidden"
+                      animate={inView ? "show" : "hidden"}
+                      variants={{ show: { transition: { staggerChildren: 0.03 } } }}
+                    >
+                      {items.map((t, i) => (
+                        <motion.span
+                          key={`${t.title}-${i}`}
+                          className="badge"
+                          variants={{
+                            hidden: { opacity: 0, scale: 0.85 },
+                            show: { opacity: 1, scale: 1 },
+                          }}
+                        >
+                          {t.title}
+                        </motion.span>
+                      ))}
+                    </motion.div>
+                  </div>
+                ))}
+                {ungrouped.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-mono t-muted mb-2 uppercase tracking-widest">
+                      Other
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ungrouped.map((t, i) => (
+                        <span key={`${t.title}-${i}`} className="badge">
+                          {t.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <motion.div
+                className="flex flex-wrap gap-2"
+                initial="hidden"
+                animate={inView ? "show" : "hidden"}
+                variants={{ show: { transition: { staggerChildren: 0.03, delayChildren: 0.3 } } }}
+              >
+                {tech.map((t, i) => (
+                  <motion.span
+                    key={`${t.title}-${i}`}
+                    className="badge"
+                    variants={{
+                      hidden: { opacity: 0, scale: 0.85 },
+                      show: { opacity: 1, scale: 1 },
+                    }}
+                  >
+                    {t.title}
+                  </motion.span>
+                ))}
+              </motion.div>
+            )}
           </motion.div>
         )}
       </div>

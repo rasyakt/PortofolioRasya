@@ -19,7 +19,7 @@ interface HeroProps {
   hkiCount: number;
   certCount: number;
   hkiCerts: Certification[];
-  tech: string[];
+  tech: { title: string; group: string | null }[];
 }
 
 const FALLBACK = {
