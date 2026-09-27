@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { Shield, Award, Star, ExternalLink, FileText, Expand } from "lucide-react";
 import { isPdfUrl } from "@/lib/media";
 import CertLightbox from "./CertLightbox";
+import SafeImage from "./SafeImage";
 
 export interface CertImage {
   id: string;
@@ -32,10 +32,11 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   award: <Award size={16} />,
 };
 
-/** Split gallery into displayable pictures + PDF documents. */
+/** Split gallery into displayable pictures + PDF documents. Legacy single
+ *  badge is appended last so it stays visible without stealing the main slot. */
 function splitMedia(cert: Certification): { pics: string[]; pdfs: string[] } {
   const urls = (cert.images ?? []).map((i) => i.url);
-  if (urls.length === 0 && cert.badgeImage) urls.push(cert.badgeImage);
+  if (cert.badgeImage && !urls.includes(cert.badgeImage)) urls.push(cert.badgeImage);
   return {
     pics: urls.filter((u) => !isPdfUrl(u)),
     pdfs: urls.filter((u) => isPdfUrl(u)),
@@ -91,14 +92,7 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
         title="Preview"
         aria-label={`Preview ${title}`}
       >
-        <Image
-          src={pics[0]}
-          alt={title}
-          fill
-          sizes="112px"
-          style={{ objectFit: "cover" }}
-          unoptimized
-        />
+        <SafeImage key={pics[0]} src={pics[0]} alt={title} sizes="112px" />
         <span
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/thumb:opacity-100 transition-opacity"
           style={{ background: "rgba(0,0,0,0.45)", color: "#fff" }}

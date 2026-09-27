@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Image from "next/image";
+import SafeImage from "../SafeImage";
 import { useRouter } from "next/navigation";
 import { createCertification, updateCertification } from "@/actions/certifications";
 import { Save, X, Upload, Trash2, ChevronUp, ChevronDown, FileText, ArrowRightToLine } from "lucide-react";
@@ -304,7 +304,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
             Gallery (gambar & PDF — gambar pertama = utama)
           </label>
 
-          {(existingImages.length > 0 || pending.length > 0 || (data.badgeImage && existingImages.length === 0)) && (
+          {(existingImages.length > 0 || pending.length > 0 || data.badgeImage) && (
             <div className="grid grid-cols-4 gap-2 mb-3">
               {existingImages.map((img, i) => (
                 <div key={img.id} className="relative rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)", aspectRatio: "1 / 1", background: "var(--bg-elevated)" }}>
@@ -314,7 +314,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                       <span className="text-[9px] font-mono">PDF</span>
                     </div>
                   ) : (
-                    <Image src={img.url} alt="" fill sizes="120px" style={{ objectFit: "cover" }} unoptimized />
+                    <SafeImage key={img.url} src={img.url} alt="" sizes="120px" />
                   )}
                   {i === 0 && (
                     <span className="absolute top-1 left-1 badge badge-accent" style={{ fontSize: "9px" }}>Utama</span>
@@ -356,10 +356,10 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                 </div>
               ))}
 
-              {/* Legacy single badge (kept for display until re-uploaded) */}
-              {data.badgeImage && existingImages.length === 0 && (
+              {/* Legacy single badge — always visible while set */}
+              {data.badgeImage && (
                 <div className="relative rounded-lg overflow-hidden" style={{ border: "1px dashed var(--border-strong)", aspectRatio: "1 / 1", background: "var(--bg-elevated)" }}>
-                  <Image src={data.badgeImage} alt="" fill sizes="120px" style={{ objectFit: "cover" }} unoptimized />
+                  <SafeImage key={data.badgeImage} src={data.badgeImage} alt="" sizes="120px" />
                   <span className="absolute top-1 left-1 badge" style={{ fontSize: "9px" }}>Lama</span>
                   <div className="absolute bottom-1 right-1 flex gap-1">
                     <button
@@ -394,7 +394,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                       <span className="text-[9px] font-mono">PDF</span>
                     </div>
                   ) : (
-                    <Image src={url} alt="" fill sizes="120px" style={{ objectFit: "cover" }} unoptimized />
+                    <SafeImage key={url} src={url} alt="" sizes="120px" />
                   )}
                   <span className="absolute top-1 left-1 badge badge-accent" style={{ fontSize: "9px" }}>Baru</span>
                   <button
