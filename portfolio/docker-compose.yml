@@ -52,6 +52,11 @@ services:
       - "${NGINX_PORT:-127.0.0.1:8080}:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Serve user uploads straight from disk (Next standalone only
+      # serves files baked in at build time, not runtime uploads)
+      - uploads-covers:/srv/uploads/covers:ro
+      - uploads-badges:/srv/uploads/badges:ro
+      - uploads-docs:/srv/uploads/docs:ro
 
   # Optional: run your Cloudflare Tunnel from compose.
   # 1. Create a tunnel in Zero Trust dashboard, get the token.
