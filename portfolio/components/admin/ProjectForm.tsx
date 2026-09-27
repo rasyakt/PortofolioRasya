@@ -139,10 +139,10 @@ export default function ProjectForm({ project }: { project?: Project }) {
         techStack: JSON.stringify(
           techInput.split(",").map((s: string) => s.trim()).filter(Boolean)
         ),
-        liveUrl: data.liveUrl || undefined,
-        githubUrl: data.githubUrl || undefined,
-        coverImage: data.coverImage || undefined,
-        hkiNumber: data.hkiNumber || undefined,
+        liveUrl: data.liveUrl || null,
+        githubUrl: data.githubUrl || null,
+        coverImage: data.coverImage || null,
+        hkiNumber: data.hkiNumber || null,
       } as Parameters<typeof createProject>[0];
 
       if (data.id) {

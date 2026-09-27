@@ -177,9 +177,9 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
         issuer: data.issuer,
         issueDate: data.issueDate,
         type: data.type as "cert" | "hki" | "award",
-        credentialUrl: data.credentialUrl || undefined,
-        badgeImage: data.badgeImage || undefined,
-        regNumber: data.regNumber || undefined,
+        credentialUrl: data.credentialUrl || null,
+        badgeImage: data.badgeImage || null,
+        regNumber: data.regNumber || null,
         order: Number(data.order) || 0,
       };
 

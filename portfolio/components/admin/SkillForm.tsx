@@ -40,8 +40,8 @@ export default function SkillForm({ item, groups }: { item?: Skill; groups?: str
       const payload = {
         kind: (data.kind === "area" ? "area" : "tech") as "area" | "tech",
         title: data.title,
-        desc: data.desc || undefined,
-        group: data.group || undefined,
+        desc: data.desc || null,
+        group: data.group || null,
         order: Number(data.order) || 0,
       };
       if (data.id) {
