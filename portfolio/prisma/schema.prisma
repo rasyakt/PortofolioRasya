@@ -44,6 +44,18 @@ model Certification {
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  images      CertificationImage[]
+}
+
+model CertificationImage {
+  id              String        @id @default(cuid())
+  certificationId String
+  certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  url             String        @db.Text
+  order           Int           @default(0)
+  createdAt       DateTime      @default(now())
+
+  @@index([certificationId, order])
 }
 
 model ProfileConfig {

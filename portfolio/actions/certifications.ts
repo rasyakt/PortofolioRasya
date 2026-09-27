@@ -18,7 +18,11 @@ const CertSchema = z.object({
 
 export async function getCertifications(type?: string) {
   const where = type && type !== "all" ? { type } : {};
-  return prisma.certification.findMany({ where, orderBy: { order: "asc" } });
+  return prisma.certification.findMany({
+    where,
+    orderBy: { order: "asc" },
+    include: { images: { orderBy: { order: "asc" } } },
+  });
 }
 
 export async function getCertificationById(id: string) {
@@ -77,6 +81,54 @@ export async function moveCertification(id: string, direction: "up" | "down") {
   await prisma.$transaction([
     prisma.certification.update({ where: { id: a.id }, data: { order: b.order } }),
     prisma.certification.update({ where: { id: b.id }, data: { order: a.order } }),
+  ]);
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true };
+}
+
+const ImageUrlSchema = z.string().min(1).max(500);
+
+export async function addCertificationImages(certificationId: string, urls: string[]) {
+  await requireAuth();
+  const clean = urls
+    .map((u) => ImageUrlSchema.parse(u.trim()))
+    .filter(Boolean)
+    .slice(0, 20);
+  if (clean.length === 0) return { success: false };
+  const existing = await prisma.certificationImage.count({ where: { certificationId } });
+  await prisma.certificationImage.createMany({
+    data: clean.map((url, i) => ({ certificationId, url, order: existing + i })),
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true };
+}
+
+export async function deleteCertificationImage(id: string) {
+  await requireAuth();
+  await prisma.certificationImage.delete({ where: { id } });
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true };
+}
+
+export async function moveCertificationImage(id: string, direction: "up" | "down") {
+  await requireAuth();
+  const item = await prisma.certificationImage.findUnique({ where: { id } });
+  if (!item) return { success: false };
+  const list = await prisma.certificationImage.findMany({
+    where: { certificationId: item.certificationId },
+    orderBy: { order: "asc" },
+  });
+  const idx = list.findIndex((x) => x.id === id);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
+  const a = list[idx];
+  const b = list[swapIdx];
+  await prisma.$transaction([
+    prisma.certificationImage.update({ where: { id: a.id }, data: { order: b.order } }),
+    prisma.certificationImage.update({ where: { id: b.id }, data: { order: a.order } }),
   ]);
   revalidatePath("/");
   revalidatePath("/admin/certifications");
