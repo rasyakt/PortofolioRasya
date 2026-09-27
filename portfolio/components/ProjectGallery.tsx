@@ -8,11 +8,19 @@ import {
 } from "lucide-react";
 import { GithubIcon } from "./icons/BrandIcons";
 import ProjectCover from "./ProjectCover";
+import PhoneMockup from "./PhoneMockup";
+import SafeImage from "./SafeImage";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./ui/Toaster";
 import { useFocusTrap } from "@/lib/focus-trap";
 import { useTilt } from "@/lib/interactions";
+
+export interface ProjectImage {
+  id: string;
+  url: string;
+  order: number;
+}
 
 export interface Project {
   id: string;
@@ -29,6 +37,7 @@ export interface Project {
   liveUrl?: string | null;
   githubUrl?: string | null;
   coverImage?: string | null;
+  images?: ProjectImage[];
   hkiNumber?: string | null;
   featured: boolean;
 }
@@ -67,6 +76,15 @@ function CaseStudyModal({
   const tech: string[] = safeParseJsonArray(project.techStack);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, true);
+
+  // Gallery first, legacy cover appended (deduped) so it never disappears.
+  const gallery = (project.images ?? []).map((i) => i.url);
+  if (project.coverImage && !gallery.includes(project.coverImage)) {
+    gallery.push(project.coverImage);
+  }
+  const [shotIdx, setShotIdx] = useState(0);
+  const shot = gallery.length > 0 ? gallery[shotIdx % gallery.length] : null;
+  const isMobileShot = project.category === "mobile" && shot;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -119,16 +137,51 @@ function CaseStudyModal({
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cover — full image, no crop */}
-        <div style={{ borderBottom: "1px solid var(--border)" }}>
-          <ProjectCover
-            title={project.title}
-            category={project.category}
-            coverImage={project.coverImage}
-            height={180}
-            natural
-          />
-        </div>
+        {/* Cover — phone frame (multi-shot) for mobile, full image otherwise */}
+        {shot && (
+          <div style={{ borderBottom: "1px solid var(--border)" }}>
+            {isMobileShot ? (
+              <div className="py-6 px-6">
+                <PhoneMockup
+                  images={gallery}
+                  index={shotIdx % gallery.length}
+                  title={project.title}
+                  onNavigate={(i) => setShotIdx(i)}
+                />
+              </div>
+            ) : (
+              <div>
+                <ProjectCover
+                  title={project.title}
+                  category={project.category}
+                  coverImage={shot}
+                  height={180}
+                  natural
+                />
+                {gallery.length > 1 && (
+                  <div className="flex gap-2 px-6 py-3 overflow-x-auto scrollbar-hide" style={{ borderTop: "1px solid var(--border)" }}>
+                    {gallery.map((u, i) => (
+                      <button
+                        key={`${u}-${i}`}
+                        onClick={() => setShotIdx(i)}
+                        className="relative shrink-0 w-20 h-14 rounded-lg overflow-hidden cursor-pointer"
+                        style={{
+                          border: i === shotIdx % gallery.length ? "2px solid var(--accent)" : "1px solid var(--border)",
+                          padding: 0,
+                          background: "var(--bg-elevated)",
+                        }}
+                        title={`Screenshot ${i + 1}`}
+                        aria-label={`View screenshot ${i + 1}`}
+                      >
+                        <SafeImage key={u} src={u} alt="" sizes="80px" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Header */}
         <div
@@ -264,6 +317,10 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
   const allTech = safeParseJsonArray(project.techStack);
   const tech: string[] = allTech.slice(0, 4);
   const tiltRef = useTilt<HTMLDivElement>(5);
+  const gallery = (project.images ?? []).map((i) => i.url);
+  if (project.coverImage && !gallery.includes(project.coverImage)) {
+    gallery.push(project.coverImage);
+  }
 
   return (
     <motion.div
@@ -276,12 +333,12 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
       onClick={onClick}
     >
       <div ref={tiltRef} className="flex flex-col flex-1 min-h-0">
-      {/* Cover */}
+      {/* Cover — first gallery image (or legacy cover) */}
       <div style={{ borderBottom: "1px solid var(--border)" }}>
         <ProjectCover
           title={project.title}
           category={project.category}
-          coverImage={project.coverImage}
+          coverImage={gallery[0] ?? null}
           className="transition-transform duration-500 group-hover:scale-[1.03]"
         />
       </div>

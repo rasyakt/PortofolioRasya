@@ -34,6 +34,7 @@ export async function getProjects(category?: string) {
   return prisma.project.findMany({
     where,
     orderBy: [{ featured: "desc" }, { order: "asc" }],
+    include: { images: { orderBy: { order: "asc" } } },
   });
 }
 
@@ -133,6 +134,82 @@ export async function reorderProjects(ids: string[]) {
   await prisma.$transaction(
     clean.map((id, index) => prisma.project.update({ where: { id }, data: { order: index } }))
   );
+  revalidatePath("/");
+  revalidatePath("/admin/projects");
+  return { success: true };
+}
+
+const ProjectImageUrlSchema = z.string().min(1).max(500);
+
+export async function addProjectImages(projectId: string, urls: string[]) {
+  await requireAuth();
+  const clean = urls
+    .map((u) => ProjectImageUrlSchema.parse(u.trim()))
+    .filter(Boolean)
+    .slice(0, 20);
+  if (clean.length === 0) return { success: false };
+  // Base on MAX order, not count — rows may have been deleted/reordered.
+  const agg = await prisma.projectImage.aggregate({
+    _max: { order: true },
+    where: { projectId },
+  });
+  const base = (agg._max.order ?? -1) + 1;
+  await prisma.projectImage.createMany({
+    data: clean.map((url, i) => ({ projectId, url, order: base + i })),
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/projects");
+  return { success: true };
+}
+
+export async function deleteProjectImage(id: string) {
+  await requireAuth();
+  await prisma.projectImage.delete({ where: { id } });
+  revalidatePath("/");
+  revalidatePath("/admin/projects");
+  return { success: true };
+}
+
+export async function moveProjectImage(id: string, direction: "up" | "down") {
+  await requireAuth();
+  const item = await prisma.projectImage.findUnique({ where: { id } });
+  if (!item) return { success: false };
+  const list = await prisma.projectImage.findMany({
+    where: { projectId: item.projectId },
+    orderBy: { order: "asc" },
+  });
+  const idx = list.findIndex((x) => x.id === id);
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return { success: false };
+  const a = list[idx];
+  const b = list[swapIdx];
+  await prisma.$transaction([
+    prisma.projectImage.update({ where: { id: a.id }, data: { order: b.order } }),
+    prisma.projectImage.update({ where: { id: b.id }, data: { order: a.order } }),
+  ]);
+  revalidatePath("/");
+  revalidatePath("/admin/projects");
+  return { success: true };
+}
+
+/**
+ * Move the legacy single cover into the gallery as the FIRST (main) image,
+ * then clear the legacy field so there is exactly one source of truth.
+ */
+export async function importLegacyCover(projectId: string) {
+  await requireAuth();
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: { images: true },
+  });
+  if (!project?.coverImage) throw new Error("No legacy cover to import");
+  await prisma.projectImage.create({
+    data: { projectId, url: project.coverImage, order: -1 },
+  });
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { coverImage: null },
+  });
   revalidatePath("/");
   revalidatePath("/admin/projects");
   return { success: true };
