@@ -27,7 +27,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME="0.0.0.0"
 # Prisma engines need OpenSSL on Alpine
-RUN apk add --no-cache openssl libc6-compat \
+RUN apk add --no-cache openssl libc6-compat su-exec \
   && addgroup -S nodejs && adduser -S nextjs -G nodejs
 
 # Standalone Next.js output
@@ -44,14 +44,15 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 # bcryptjs (used by scripts/create-admin.mjs)
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
-# Runtime scripts
+# Runtime scripts (entrypoint normalizes its own line endings for Windows checkouts)
 COPY --from=builder /app/scripts ./scripts
+RUN sed -i 's/\r$//' ./scripts/entrypoint.sh && chmod +x ./scripts/entrypoint.sh
 
-USER nextjs
 EXPOSE 3000
 
 # Upload dirs are persisted via compose volumes (see docker-compose.yml)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && exec node server.js"]
+ENTRYPOINT ["./scripts/entrypoint.sh"]
+CMD ["server"]

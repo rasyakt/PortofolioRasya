@@ -63,6 +63,8 @@ services:
     restart: unless-stopped
     depends_on:
       - nginx
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?set in .env}
     environment:
       - TUNNEL_TRANSPORT_PROTOCOL=quic
