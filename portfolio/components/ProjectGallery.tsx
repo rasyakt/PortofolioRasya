@@ -119,13 +119,14 @@ function CaseStudyModal({
         transition={{ duration: 0.2 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cover */}
+        {/* Cover — full image, no crop */}
         <div style={{ borderBottom: "1px solid var(--border)" }}>
           <ProjectCover
             title={project.title}
             category={project.category}
             coverImage={project.coverImage}
             height={180}
+            natural
           />
         </div>
 

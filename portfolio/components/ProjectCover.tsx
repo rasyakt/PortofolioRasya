@@ -15,14 +15,28 @@ interface ProjectCoverProps {
   coverImage?: string | null;
   height?: number;
   className?: string;
+  /** When true, real images render at natural aspect (no crop). */
+  natural?: boolean;
 }
 
 /**
  * Project cover visual. Shows the real cover image when available,
  * otherwise a theme-aware monochrome pattern with a category mark.
  */
-export default function ProjectCover({ title, category, coverImage, height = 148, className = "" }: ProjectCoverProps) {
+export default function ProjectCover({ title, category, coverImage, height = 148, className = "", natural = false }: ProjectCoverProps) {
   if (coverImage) {
+    if (natural) {
+      return (
+        // Plain img: natural aspect needs intrinsic sizing, which fill-layout can't provide.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverImage}
+          alt={title}
+          loading="lazy"
+          className={`w-full h-auto block ${className}`}
+        />
+      );
+    }
     return (
       <div className={`relative overflow-hidden ${className}`} style={{ height }}>
         <Image

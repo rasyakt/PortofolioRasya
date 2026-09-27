@@ -363,7 +363,7 @@ export default function ProjectForm({ project }: { project?: Project }) {
         {/* Cover upload */}
         <div>
           <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Cover Image (upload — PNG/JPG/WebP/GIF, maks 5 MB)
+            Cover Image (upload — PNG/JPG/WebP/GIF, maks 5 MB, ideal 1200×675)
           </label>
           {data.coverImage ? (
             <div className="flex items-start gap-4">
