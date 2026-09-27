@@ -98,7 +98,6 @@ export default function Hero({
   const headline = profile?.headline || FALLBACK.headline;
   const roles = headline.split("|").map((s) => s.trim()).filter(Boolean);
   const bio = profile?.bio || FALLBACK.bio;
-  const location = profile?.location || FALLBACK.location;
   const email = profile?.email || FALLBACK.email;
   const cvUrl = profile?.cvUrl || "/cv.pdf";
   const available = profile ? profile.isAvailable : true;
@@ -170,13 +169,29 @@ export default function Hero({
               ) : (
                 <span className="t-muted">{availabilityText}</span>
               )}
-              <span className="t-muted"> · {location}</span>
             </p>
 
-            {/* Name + role */}
-            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight t-primary leading-[1.1] mb-4">
-              {nameLines[0]}
-              {nameLines[1] ? <><br />{nameLines[1]}</> : null}
+            {/* Name */}
+            <h1
+              className="text-[2.75rem] sm:text-6xl font-bold leading-[1.05] mb-4"
+              style={{ letterSpacing: "-0.035em" }}
+            >
+              <span className="t-primary block">{nameLines[0]}</span>
+              {nameLines[1] ? (
+                <span
+                  className="block pb-1.5"
+                  style={{
+                    background:
+                      "linear-gradient(100deg, var(--text-primary) 25%, var(--accent-strong) 95%)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    color: "transparent",
+                  }}
+                >
+                  {nameLines[1]}
+                </span>
+              ) : null}
             </h1>
             <p className="text-[15px] t-secondary mb-5">
               {roles.map((r, i) => (
@@ -284,7 +299,7 @@ export default function Hero({
               <ProfileIDCard
                 name={name}
                 headline={roles.join(" · ")}
-                location={location}
+                location={profile?.location || FALLBACK.location}
                 email={email}
                 photoUrl={profile?.photoUrl}
               />
