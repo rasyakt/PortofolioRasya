@@ -100,9 +100,37 @@ export async function addCertificationImages(certificationId: string, urls: stri
     .filter(Boolean)
     .slice(0, 20);
   if (clean.length === 0) return { success: false };
-  const existing = await prisma.certificationImage.count({ where: { certificationId } });
+  // Base on MAX order, not count — rows may have been deleted/reordered.
+  const agg = await prisma.certificationImage.aggregate({
+    _max: { order: true },
+    where: { certificationId },
+  });
+  const base = (agg._max.order ?? -1) + 1;
   await prisma.certificationImage.createMany({
-    data: clean.map((url, i) => ({ certificationId, url, order: existing + i })),
+    data: clean.map((url, i) => ({ certificationId, url, order: base + i })),
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/certifications");
+  return { success: true };
+}
+
+/**
+ * Move the legacy single badge into the gallery as the FIRST (main) image,
+ * then clear the legacy field so there is exactly one source of truth.
+ */
+export async function importLegacyBadge(certificationId: string) {
+  await requireAuth();
+  const cert = await prisma.certification.findUnique({
+    where: { id: certificationId },
+    include: { images: true },
+  });
+  if (!cert?.badgeImage) throw new Error("No legacy badge to import");
+  await prisma.certificationImage.create({
+    data: { certificationId, url: cert.badgeImage, order: -1 },
+  });
+  await prisma.certification.update({
+    where: { id: certificationId },
+    data: { badgeImage: null },
   });
   revalidatePath("/");
   revalidatePath("/admin/certifications");

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createCertification, updateCertification } from "@/actions/certifications";
-import { Save, X, Upload, Trash2, ChevronUp, ChevronDown, FileText } from "lucide-react";
+import { Save, X, Upload, Trash2, ChevronUp, ChevronDown, FileText, ArrowRightToLine } from "lucide-react";
 import { toast } from "../ui/Toaster";
 import { useFormGuard } from "@/lib/form-guard";
 import { isPdfUrl } from "@/lib/media";
@@ -12,6 +12,7 @@ import {
   addCertificationImages,
   deleteCertificationImage,
   moveCertificationImage,
+  importLegacyBadge,
 } from "@/actions/certifications";
 
 interface CertImage {
@@ -141,6 +142,23 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
       toast("Image deleted");
     } catch {
       setUploadError("Failed to delete image");
+    }
+  };
+
+  const importLegacy = async () => {
+    if (!data.id || !data.badgeImage) return;
+    try {
+      await importLegacyBadge(data.id);
+      const url = data.badgeImage;
+      setData((d) => ({
+        ...d,
+        badgeImage: null,
+        images: [{ id: `legacy-${Date.now()}`, url, order: -1 }, ...(d.images ?? [])],
+      }));
+      toast("Old badge moved to gallery as main image");
+      router.refresh();
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Failed to import badge");
     }
   };
 
@@ -343,16 +361,28 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                 <div className="relative rounded-lg overflow-hidden" style={{ border: "1px dashed var(--border-strong)", aspectRatio: "1 / 1", background: "var(--bg-elevated)" }}>
                   <Image src={data.badgeImage} alt="" fill sizes="120px" style={{ objectFit: "cover" }} unoptimized />
                   <span className="absolute top-1 left-1 badge" style={{ fontSize: "9px" }}>Lama</span>
-                  <button
-                    type="button"
-                    onClick={() => set("badgeImage", "")}
-                    className="absolute bottom-1 right-1 p-1 rounded icon-btn"
-                    style={{ background: "rgba(0,0,0,0.55)" }}
-                    title="Remove legacy badge (save to apply)"
-                    aria-label="Remove legacy badge"
-                  >
-                    <Trash2 size={11} />
-                  </button>
+                  <div className="absolute bottom-1 right-1 flex gap-1">
+                    <button
+                      type="button"
+                      onClick={importLegacy}
+                      className="p-1 rounded icon-btn"
+                      style={{ background: "rgba(0,0,0,0.55)" }}
+                      title="Move to gallery as main image"
+                      aria-label="Move old badge to gallery as main image"
+                    >
+                      <ArrowRightToLine size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => set("badgeImage", "")}
+                      className="p-1 rounded icon-btn"
+                      style={{ background: "rgba(0,0,0,0.55)" }}
+                      title="Remove legacy badge (save to apply)"
+                      aria-label="Remove legacy badge"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
                 </div>
               )}
 
