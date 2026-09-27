@@ -324,8 +324,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                       type="button"
                       onClick={() => moveExisting(img.id, "up")}
                       disabled={i === 0}
-                      className="p-1 rounded icon-btn"
-                      style={{ background: "rgba(0,0,0,0.55)", opacity: i === 0 ? 0.3 : 1 }}
+                      className="p-1 rounded overlay-btn"
                       title="Move left"
                       aria-label="Move left"
                     >
@@ -335,8 +334,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                       type="button"
                       onClick={() => moveExisting(img.id, "down")}
                       disabled={i === existingImages.length - 1}
-                      className="p-1 rounded icon-btn"
-                      style={{ background: "rgba(0,0,0,0.55)", opacity: i === existingImages.length - 1 ? 0.3 : 1 }}
+                      className="p-1 rounded overlay-btn"
                       title="Move right"
                       aria-label="Move right"
                     >
@@ -345,8 +343,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                     <button
                       type="button"
                       onClick={() => deleteExisting(img.id)}
-                      className="p-1 rounded icon-btn"
-                      style={{ background: "rgba(0,0,0,0.55)" }}
+                      className="p-1 rounded overlay-btn"
                       title="Delete"
                       aria-label="Delete image"
                     >
@@ -365,8 +362,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                     <button
                       type="button"
                       onClick={importLegacy}
-                      className="p-1 rounded icon-btn"
-                      style={{ background: "rgba(0,0,0,0.55)" }}
+                      className="p-1 rounded overlay-btn"
                       title="Move to gallery as main image"
                       aria-label="Move old badge to gallery as main image"
                     >
@@ -375,8 +371,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                     <button
                       type="button"
                       onClick={() => set("badgeImage", "")}
-                      className="p-1 rounded icon-btn"
-                      style={{ background: "rgba(0,0,0,0.55)" }}
+                      className="p-1 rounded overlay-btn"
                       title="Remove legacy badge (save to apply)"
                       aria-label="Remove legacy badge"
                     >
@@ -400,8 +395,7 @@ export default function CertificationForm({ cert }: { cert?: Certification }) {
                   <button
                     type="button"
                     onClick={() => setPending((p) => p.filter((x) => x !== url))}
-                    className="absolute bottom-1 right-1 p-1 rounded icon-btn"
-                    style={{ background: "rgba(0,0,0,0.55)" }}
+                    className="absolute bottom-1 right-1 p-1 rounded overlay-btn"
                     title="Remove"
                     aria-label="Remove pending upload"
                   >

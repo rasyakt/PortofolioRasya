@@ -85,6 +85,17 @@ a.t-secondary:hover, button.t-secondary:hover { color: var(--text-primary); }
 }
 .icon-btn:hover { color: var(--accent); }
 
+/* Icon button floating over images — always light-on-dark */
+.overlay-btn {
+  color: #e4e4e7;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.overlay-btn:hover { color: #fff; }
+.overlay-btn:disabled { opacity: 0.3; cursor: default; }
+
 /* Boxed contact icon */
 .contact-icon {
   color: var(--text-muted);

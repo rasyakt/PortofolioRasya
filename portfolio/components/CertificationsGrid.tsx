@@ -101,7 +101,10 @@ export default function CertificationsGrid({ certs }: { certs: Certification[] }
           <Expand size={16} />
         </span>
         {pics.length > 1 && (
-          <span className="absolute bottom-1 right-1 badge" style={{ fontSize: "9px", background: "rgba(0,0,0,0.65)" }}>
+          <span
+            className="absolute bottom-1 right-1 badge"
+            style={{ fontSize: "9px", background: "rgba(0,0,0,0.65)", color: "#fff", borderColor: "transparent" }}
+          >
             +{pics.length - 1}
           </span>
         )}
