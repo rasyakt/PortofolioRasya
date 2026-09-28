@@ -127,3 +127,9 @@ npm run start
 - GitHub: [@rasyakt](https://github.com/rasyakt)  
 - LinkedIn: [Rasya Syahreza Maulana Zen](https://linkedin.com/in/rasya-syahreza-maulana-zen)  
 - Live Portal: [gasela.my.id](https://gasela.my.id)
+
+---
+
+## 📄 License
+
+MIT © 2026 Rasya Syahreza Maulana Zen — see [LICENSE](./LICENSE).

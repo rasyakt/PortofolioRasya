@@ -1,3 +1,8 @@
+/**
+ * rasya.dev — personal portfolio of Rasya Syahreza Maulana Zen.
+ * (c) 2026 Rasya Syahreza Maulana Zen. Licensed under the MIT License.
+ * See LICENSE in the project root.
+ */
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -105,6 +110,7 @@ export default async function RootLayout({
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f5" />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0b" />
         <script
+          // Built with Next.js by Rasya Syahreza Maulana Zen (c) 2026 MIT
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
